@@ -5,7 +5,14 @@ One-line description
 
 ## Project goal(s)
 
+The major goal is to replace static and tediously updated spreedsheet solution with a more interactive and functional platform/website to:
+- Track scores of students and teams;
+- Automate peer-feedback process;
+- Possibly integrate with Google drive and Moodle.
+
 ## Threshold of Success
+
+A project is considered to be successful if it provides the same functionality as current spreadsheet solution and more convenient grade description (by clicking on a team or a student) and automates peer-feedback assignment matching (a team understands who they need to provide feedback to).
 
 ## Description
 
@@ -13,7 +20,17 @@ One-line description
 
 ### Stakeholders
 
+- Teaching assistants;
+- Primary instructor;
+- ITPD Students;
+- Development team;
+- University administration.
+
 ### External Systems
+
+- Google drive - a cloud file storage with PDFs student submissions and instructors feedback;
+- Moodle - format compliance for importing and exporting grades. Also, possible integration to download or upload files to assignments;
+- Innopolis mail, SSO, etc. - possible for seamless integration with university educational process.
 
 ## Feature Roadmap
 
