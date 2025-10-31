@@ -1,6 +1,6 @@
 # PeerPilot  
 <p align="center">
-  <img src="docs/assets/peerpilot-logo.svg" alt="PeerPilot – Peer review · Grades · Transparency" width="320" />
+  <img src="docs/peerpilot-logo.svg" alt="PeerPilot – Peer review · Grades · Transparency" width="320" />
 </p>
 
 **One-line description:**  
