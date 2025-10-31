@@ -3,7 +3,6 @@
   <img src="docs/peerpilot-logo.svg" alt="PeerPilot – Peer review · Grades · Transparency" width="320" />
 </p>
 
-**One-line description:**  
 A self-hosted platform to automate peer reviews, track grades, and streamline course coordination — built to replace spreadsheets with structured clarity.
 
 ## Project goal(s)
