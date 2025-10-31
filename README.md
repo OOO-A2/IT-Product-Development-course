@@ -1,13 +1,32 @@
 # PeerPilot  
-<p align="center">
-  <img src="docs/assets/peerpilot-logo.svg" alt="PeerPilot – Peer review · Grades · Transparency" width="320" />
-</p>
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="80" viewBox="0 0 320 80" fill="none">
+  <!-- ICON -->
+  <g transform="translate(10,10)">
+    <circle cx="30" cy="30" r="28" stroke="#4D6BFF" stroke-width="4" fill="none"/>
+    <circle cx="30" cy="30" r="12" fill="#4D6BFF"/>
+    <rect x="12" y="28" width="36" height="4" rx="2" fill="#4D6BFF"/>
+    <rect x="28" y="12" width="4" height="36" rx="2" fill="#4D6BFF"/>
+  </g>
 
-<h1 align="center">PeerPilot</h1>
+  <!-- WORDMARK -->
+  <g transform="translate(90,22)">
+    <text x="0" y="18" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+          font-size="24" font-weight="500" fill="#F8FAFC" letter-spacing="-0.03em">
+      Peer
+    </text>
 
-<p align="center">
-  A self-hosted platform to automate peer reviews, track grades, and streamline course coordination — built to replace spreadsheets with structured clarity.
-</p>
+    <text x="70" y="18" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+          font-size="24" font-weight="600" fill="#4D6BFF" letter-spacing="-0.03em">
+      Pilot
+    </text>
+
+    <text x="0" y="42" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+          font-size="12" font-weight="400" fill="#94A3B8" letter-spacing="-0.03em">
+      Peer review · Grades · Transparency
+    </text>
+  </g>
+</svg>
+
 
 **One-line description:**  
 A self-hosted platform to automate peer reviews, track grades, and streamline course coordination — built to replace spreadsheets with structured clarity.
