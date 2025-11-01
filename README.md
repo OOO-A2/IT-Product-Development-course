@@ -57,19 +57,18 @@ The platform is designed to be self-hosted to ensure confidentiality and complia
 ### Features for MVP
 - [ ] User login with role-based access (students, instructors)
 - [ ] Instructor dashboard to view and manage team grades, submissions, and reviews
-- [ ] Student dashboard to view personal and team grades
+- [ ] Student dashboard to view personal and team grades, who to review and link to the review submission
 - [ ] Automate peer review matching using cyclic or randomized strategies
-- [ ] Upload peer review feedback as structured PDF files
-- [ ] Track peer review status (who submitted feedback for whom)
-- [ ] Add structured feedback and extra point justification
+- [ ] Upload peer review feedback as PDF files
+- [ ] Edit extra point with justification
 - [ ] Export final grades in a Moodle-compatible format
+- [ ] Self-hosted deployment
 
 ### Future Features
 - [ ] Fetch assignment PDFs automatically from Google Drive
 - [ ] PDF viewer with inline commenting for instructors
 - [ ] Integration with Moodle API (automated grade sync, file transfer)
 - [ ] Sign-on via Innopolis University accounts
-- [ ] Student-facing submission system (upload reports directly)
 - [ ] Notifications or reminders for late submissions or missing reviews
 
 ## Documentation
