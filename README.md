@@ -29,11 +29,11 @@ In many current university workflows, instructors and TAs use spreadsheets to ma
 These workflows are time-consuming, error-prone, and difficult to maintain across semesters.
 
 **PeerPilot solves this** by:
-- Automatically assigning teams for peer review using customizable algorithms (cyclic, randomized)
+- Automatically assigning teams for peer review using customizable algorithms
 - Providing a unified dashboard for students and instructors to view grades, feedback, and assignments
-- Integrating (optionally) with Google Drive for fetching student submission links
 - Enabling structured feedback collection and justification of bonus points
 - Exporting grades in formats compatible with Moodle
+- Integrating with Google Drive for fetching student submission
 
 The platform is designed to be self-hosted to ensure confidentiality and compliance with university data policies.
 
@@ -54,16 +54,22 @@ The platform is designed to be self-hosted to ensure confidentiality and complia
 - Innopolis mail, SSO, etc. - possible for seamless integration with university educational process.
 
 ## Feature Roadmap
+### Features for MVP
+- [ ] User login with role-based access (students, instructors)
+- [ ] Instructor dashboard to view and manage team grades, submissions, and reviews
+- [ ] Student dashboard to view personal and team grades, who to review and link to the review submission
+- [ ] Automate peer review matching using cyclic or randomized strategies
+- [ ] Upload peer review feedback as PDF files
+- [ ] Edit extra point with justification
+- [ ] Export final grades in a Moodle-compatible format
+- [ ] Self-hosted deployment
 
-- [ ] Automate peer review matching using cyclic/random strategies  
-- [ ] Fetch assignment PDFs from Google Drive automatically  
-- [ ] Student dashboard to view personal and team grades at any point in the course  
-- [ ] Instructor dashboard with filters and visual indicators (e.g., red = underperforming team)  
-- [ ] Upload peer review feedback as structured PDF files  
-- [ ] Enter extra points and feedback with proper justification  
-- [ ] Self-hosted deployment with login via Innopolis emails  
-- [ ] Export final grades in Moodle-compatible format  
-- [ ] PDF viewer integration for instructors to leave inline feedback (optional)  
+### Future Features
+- [ ] Fetch assignment PDFs automatically from Google Drive
+- [ ] PDF viewer with inline commenting for instructors
+- [ ] Integration with Moodle API (automated grade sync, file transfer)
+- [ ] Sign-on via Innopolis University accounts
+- [ ] Notifications or reminders for late submissions or missing reviews
 
 ## Documentation
 
