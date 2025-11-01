@@ -1,6 +1,6 @@
 1. 29.10.2025 2 pm
 
-2. https://drive.google.com/file/d/1CB5p1b8K-SOee_xSbvfvdX75aj6Ou4y2/view?usp=drive_link
+2. https://drive.google.com/file/d/1bL7cg-IEt9P49oavH6agETbmkV6rjVLs/view?usp=sharing
 
 3. Summary of the meeting. Core features of the planned platform:
 
