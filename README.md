@@ -7,14 +7,14 @@ A self-hosted platform to automate peer reviews, track grades, and streamline co
 
 ## Project goal(s)
 
-The major goal is to replace static and tediously updated spreedsheet solution with a more interactive and functional platform/website to:
+The major goal is to replace the static and tediously updated spreadsheet solution with a more interactive and functional platform/website to:
 - Track scores of students and teams;
 - Automate peer-feedback process;
-- Possibly integrate with Google drive and Moodle.
+- Possibly integrate with Google Drive and Moodle.
 
 ## Threshold of Success
 
-A project is considered to be successful if it provides the same functionality as current spreadsheet solution and more convenient grade description (by clicking on a team or a student) and automates peer-feedback assignment matching (a team understands who they need to provide feedback to).
+A project is considered successful if it provides the same functionality as the current spreadsheet solution and offers a more convenient grade description (by clicking on a team or a student), as well as automates peer-feedback assignment matching (enabling a team to understand who they need to provide feedback to).
 
 ## Description
 
@@ -33,9 +33,9 @@ These workflows are time-consuming, error-prone, and difficult to maintain acros
 - Providing a unified dashboard for students and instructors to view grades, feedback, and assignments
 - Enabling structured feedback collection and justification of bonus points
 - Exporting grades in formats compatible with Moodle
-- Integrating with Google Drive for fetching student submission
+- Integrating with Google Drive for fetching student submissions
 
-The platform is designed to be self-hosted to ensure confidentiality and compliance with university data policies.
+The platform is designed to be self-hosted, ensuring confidentiality and compliance with university data policies.
 
 ## Project Context Diagram
 
@@ -49,18 +49,17 @@ The platform is designed to be self-hosted to ensure confidentiality and complia
 
 ### External Systems
 
-- Google drive - a cloud file storage with PDFs student submissions and instructors feedback;
+- Google Drive - a cloud file storage with PDFs, student submissions, and instructors' feedback;
 - Moodle - format compliance for importing and exporting grades. Also, possible integration to download or upload files to assignments;
-- Innopolis mail, SSO, etc. - possible for seamless integration with university educational process.
+- Innopolis mail, SSO, etc. - possible for seamless integration with the university educational process.
 
 ## Feature Roadmap
 ### Features for MVP
 - [ ] User login with role-based access (students, instructors)
 - [ ] Instructor dashboard to view and manage team grades, submissions, and reviews
-- [ ] Student dashboard to view personal and team grades, who to review and link to the review submission
+- [ ] Student dashboard to view personal and team grades, who to review, and link to the review submission
 - [ ] Automate peer review matching using cyclic or randomized strategies
 - [ ] Upload peer review feedback as PDF files
-- [ ] Edit extra point with justification
 - [ ] Export final grades in a Moodle-compatible format
 - [ ] Self-hosted deployment
 
@@ -68,12 +67,12 @@ The platform is designed to be self-hosted to ensure confidentiality and complia
 - [ ] Fetch assignment PDFs automatically from Google Drive
 - [ ] PDF viewer with inline commenting for instructors
 - [ ] Integration with Moodle API (automated grade sync, file transfer)
-- [ ] Sign-on via Innopolis University accounts
+- [ ] Sign on via Innopolis University accounts
 - [ ] Notifications or reminders for late submissions or missing reviews
 
 ## Documentation
 
-The repo is organized as following:
+The repo is organized as follows:
 - [Sprints folder](docs/sprints) - List of folders for each sprint. 
     - **Sprint-0 contains**
     - Details on [meetings](docs/sprints/sprint-0/meeting-1.md) with a customer
