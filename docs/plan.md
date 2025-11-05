@@ -16,14 +16,61 @@
 
 ## Threshold of Success
 By the end of the course, deliver a Minimum Viable Product (MVP) that:
-- ✅ **Supports user login and role-based access** (instructor/student) with authentication system
-- ✅ **Provides instructor dashboard** to view and manage team grades, submissions, and review assignments
-- ✅ **Offers student dashboard** to view personal/team grades and review assignments
-- ✅ **Automates peer review matching** using cyclic or randomized assignment strategies
-- ✅ **Allows PDF uploads** for peer review feedback submission
-- ✅ **Exports grades in Moodle-compatible CSV format** for easy grade transfer
-- ✅ **Supports self-hosted deployment** via Docker containerization
-- ✅ **Provides the same core functionality** as the current spreadsheet solution with improved usability
+### ✅ Authentication & Access Control
+- **Specific**: Implement role-based authentication system supporting instructors and students
+- **Measurable**: System successfully authenticates users and enforces role-based permissions for all dashboard features
+- **Achievable**: Use secure session-based authentication without requiring complex SSO integration initially
+- **Relevant**: Essential for protecting sensitive grade data and providing appropriate interfaces per user type
+- **Time-bound**: Complete authentication system deployed by end of Sprint 3
+
+### ✅ Instructor Dashboard
+- **Specific**: Provide comprehensive dashboard for instructors to manage teams, grades, and review assignments
+- **Measurable**: Instructors can perform all key operations: view team lists, manage grades, assign reviews within 3 clicks
+- **Achievable**: Build on standard web framework components with focused feature set
+- **Relevant**: Replaces spreadsheet manual management with automated, structured interface
+- **Time-bound**: Core dashboard functionality operational by end of Sprint 4
+
+### ✅ Student Dashboard  
+- **Specific**: Deliver student-facing interface for viewing grades and review assignments
+- **Measurable**: Students can access personal grades, team information, and review tasks within 10 seconds of login
+- **Achievable**: Limited scope focusing on read-only operations and simple submissions
+- **Relevant**: Provides transparency and clear guidance on peer review responsibilities
+- **Time-bound**: Student portal deployed and tested by end of Sprint 5
+
+### ✅ Peer Review Automation
+- **Specific**: Automate peer review matching using configurable algorithms (cyclic/randomized)
+- **Measurable**: System generates review assignments for 50+ students in under 30 seconds with zero manual intervention
+- **Achievable**: Implement proven assignment algorithms rather than developing novel approaches
+- **Relevant**: Eliminates most time-consuming manual process in current workflow
+- **Time-bound**: Automated matching feature complete by end of Sprint 6
+
+### ✅ PDF Feedback System
+- **Specific**: Enable PDF uploads for peer review feedback with secure file storage
+- **Measurable**: System accepts PDF files up to 10MB, stores them reliably, and makes them accessible to intended recipients
+- **Achievable**: Use established file handling libraries with proper validation
+- **Relevant**: Maintains familiar feedback format while adding structure and automation
+- **Time-bound**: File upload and retrieval system operational by end of Sprint 5
+
+### ✅ Moodle Grade Export
+- **Specific**: Export grades in Moodle-compatible CSV format matching institutional requirements
+- **Measurable**: Generated CSV files import successfully into Moodle without manual reformatting for 100% of test cases
+- **Achievable**: Follow documented Moodle CSV specifications with rigorous format validation
+- **Relevant**: Enables seamless integration with existing university grading workflow
+- **Time-bound**: Export feature complete and validated by end of Sprint 7
+
+### ✅ Self-Hosted Deployment
+- **Specific**: Support Docker-based deployment for university IT infrastructure
+- **Measurable**: System runs successfully in Docker containers with all core features functional in isolated environment
+- **Achievable**: Containerize existing web application stack without requiring complex orchestration
+- **Relevant**: Meets university data privacy and infrastructure requirements
+- **Time-bound**: Docker configuration and deployment documentation ready by end of Sprint 8
+
+### ✅ Core Spreadsheet Parity
+- **Specific**: Provide equivalent functionality to current spreadsheet solution with enhanced usability
+- **Measurable**: All data management operations currently performed in spreadsheets can be completed in PeerPilot with equal or better efficiency
+- **Achievable**: Focus on replicating proven workflows rather than reinventing processes
+- **Relevant**: Ensures smooth transition from existing system while delivering tangible improvements
+- **Time-bound**: Feature parity demonstrated in user acceptance testing by final delivery
 
 ## Feature Roadmap
 
