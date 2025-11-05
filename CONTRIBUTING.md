@@ -85,12 +85,6 @@ We maintain quality through multiple layers of verification:
 - **UI Tests**: For critical user workflows (if time permits)
 - **Manual Testing**: For visual design and user experience
 
-### Review Processes
-- **UI/UX Review**: All interface changes require Figma prototype validation
-- **Architecture Review**: Major technical decisions require team discussion
-- **Documentation Review**: Technical documentation is reviewed for clarity
-- **Customer Review**: Key features are demonstrated to ensure they meet requirements
-
 ### Quality Metrics
 - **Test Coverage**: Aim for 80%+ coverage on critical paths
 - **Code Review Time**: Target <24 hours for review turnaround
