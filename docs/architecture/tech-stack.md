@@ -1,3 +1,9 @@
+---
+layout: default
+nav_order: 1
+title: "Tech Stack"
+---
+
 # Tech Stack
 
 ## Frontend

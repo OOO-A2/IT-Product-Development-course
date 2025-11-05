@@ -1,3 +1,10 @@
+---
+layout: default
+nav_order: 2
+parent: "Sprint 0"
+title: "Script"
+---
+
 ## 1. Introduction
 "Thank you for meeting with us today. We want to understand your current workflow and challenges to build something that truly helps professors and the TAs. We'll be recording for our notes and may ask follow-up questions about specific experiences".
 

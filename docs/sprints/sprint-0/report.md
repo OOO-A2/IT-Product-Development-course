@@ -1,3 +1,11 @@
+---
+layout: default
+title: "Sprint 0"
+nav_order: 2
+has_children: true
+permalink: /sprints/sprint-0/
+---
+
 A brief report on what we've learned
 
 - Preparing a detailed script without knowing customer problems is hard, broader questions should be asked.

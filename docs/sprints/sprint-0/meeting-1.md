@@ -1,3 +1,10 @@
+---
+layout: default
+nav_order: 1
+parent: "Sprint 0"
+title: "Meeting 1"
+---
+
 1. 29.10.2025 2 pm
 
 2. https://drive.google.com/file/d/1bL7cg-IEt9P49oavH6agETbmkV6rjVLs/view?usp=sharing
