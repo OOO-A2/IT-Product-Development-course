@@ -44,13 +44,6 @@ By the end of the course, deliver a Minimum Viable Product (MVP) that:
 - **Relevant**: Eliminates most time-consuming manual process in current workflow
 - **Time-bound**: Automated matching feature complete by end of Sprint 6
 
-### ✅ PDF Feedback System
-- **Specific**: Enable PDF uploads for peer review feedback with secure file storage
-- **Measurable**: System accepts PDF files up to 10MB, stores them reliably, and makes them accessible to intended recipients
-- **Achievable**: Use established file handling libraries with proper validation
-- **Relevant**: Maintains familiar feedback format while adding structure and automation
-- **Time-bound**: File upload and retrieval system operational by end of Sprint 5
-
 ### ✅ Moodle Grade Export
 - **Specific**: Export grades in Moodle-compatible CSV format matching institutional requirements
 - **Measurable**: Generated CSV files import successfully into Moodle without manual reformatting for 100% of test cases
