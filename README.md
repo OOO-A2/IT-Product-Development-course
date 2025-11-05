@@ -1,6 +1,8 @@
 # PeerPilot  
+[![GitHub Pages with Jekyll](https://github.com/OOO-A2/IT-Product-Development-course/actions/workflows/pages.yml/badge.svg)](https://ooo-a2.github.io/IT-Product-Development-course/)
+
 <p align="center">
-  <img src="docs/peerpilot-logo.svg" alt="PeerPilot – Peer review · Grades · Transparency" width="320" />
+  <img src="docs/assets/peerpilot-logo.svg" alt="PeerPilot – Peer review · Grades · Transparency" width="320" />
 </p>
 
 A self-hosted platform to automate peer reviews, track grades, and streamline course coordination — built to replace spreadsheets with structured clarity.
