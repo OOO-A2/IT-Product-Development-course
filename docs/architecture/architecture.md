@@ -2,7 +2,7 @@
 ## Interactive prototype
 Link to the interactive prototype in Figma.
 ## Context diagram
-![Context diagram](docs/architecture/assets/context_diagram.png)
+![Context diagram](assets/context_diagram.png)
 | Actor / System | Description | Key Interactions |
 |---|---|---|
 | Student / Team | Students performing peer reviews and tracking progress. | View personal/team grades; see assigned review targets; download target submission; upload review PDF. |
@@ -13,7 +13,7 @@ Link to the interactive prototype in Figma.
 | Identity Provider (University SSO / email whitelist) | Authentication and authorization source. | Server-side login and role assignment (student vs instructor). |
 | Email Service (optional) | Outbound notifications and reminders. | Send course/admin messages if notifications are enabled. |
 ## Use case diagram
-![Use case diagram](docs/architecture/assets/use_case_diagram.png)
+![Use case diagram](assets/use_case_diagram.png)
 | Actor | Description | Main Goals |
 |---|---|---|
 | **Student / Team** | Students working in teams who perform peer reviews and track progress. | See current personal/team grades; see assigned review target; download target submission; upload review PDF; check review status; open repo link. |
@@ -24,7 +24,7 @@ Link to the interactive prototype in Figma.
 | **Repository Host** *(System)* | GitHub/GitLab with team repos. | Provide repo links displayed in dashboards. |
 | **Email Service** *(System)* | Outbound mailer used if notifications are enabled. | Deliver reminders and admin messages. |
 ### Component diagram
-![Component diagram](docs/architecture/assets/component_diagram.png)
+![Component diagram](assets/component_diagram.png)
 | Component | Responsibilities |
 |---|---|
 | **Web App (Student UI)** | Student-facing SPA: shows personal/team grades, assigned review targets, links to target PDFs, review upload. |
@@ -40,5 +40,5 @@ Link to the interactive prototype in Figma.
 | **Notification Service** | Optional outbound emails (missing review, export ready, etc.) via **Email SMTP/API**; templating and rate limiting. |
 | **File Store (Local)** | Local persistent storage for imported submissions and uploaded review PDFs (self-hosted, privacy-preserving). |
 ### Sequence diagrams
-![Sequence diagram](docs/architecture/assets/sequence_1_diagram.png)
-![Sequence diagram](docs/architecture/assets/sequence_2_diagram.png)
+![Sequence diagram](assets/sequence_1_diagram.png)
+![Sequence diagram](assets/sequence_2_diagram.png)
