@@ -5,9 +5,7 @@
 - [Component Diagram](#component-diagram)
 - [Sequence Diagrams](#sequence-diagrams)
 ## Interactive Prototype
-```figma
-https://www.figma.com/proto/hk0bqFHLPL5NcOpYbwDr6x/Untitled?node-id=0-1&t=UeW5SXTSeFen4Ni6-1
-```
+[Open the Figma prototype](https://www.figma.com/proto/hk0bqFHLPL5NcOpYbwDr6x/Untitled?node-id=0-1&t=UeW5SXTSeFen4Ni6-1)
 ## Context Diagram
 ![Context diagram](assets/context_diagram.png)
 | Actor / System | Description | Key Interactions |
