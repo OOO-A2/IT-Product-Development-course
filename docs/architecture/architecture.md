@@ -5,7 +5,9 @@
 - [Component Diagram](#component-diagram)
 - [Sequence Diagrams](#sequence-diagrams)
 ## Interactive Prototype
-<iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="800" height="450" src="https://embed.figma.com/design/hk0bqFHLPL5NcOpYbwDr6x/Untitled?node-id=0-1&embed-host=share" allowfullscreen></iframe>
+```figma
+https://www.figma.com/proto/hk0bqFHLPL5NcOpYbwDr6x/Untitled?node-id=0-1&t=UeW5SXTSeFen4Ni6-1
+```
 ## Context Diagram
 ![Context diagram](assets/context_diagram.png)
 | Actor / System | Description | Key Interactions |
