@@ -1,7 +1,12 @@
 ## Table of Contents
-## Interactive prototype
-Link to the interactive prototype in Figma.
-## Context diagram
+- [Interactive Prototype](#interactive-prototype)
+- [Context Diagram](#context-diagram)
+- [Use Case Diagram](#use-case-diagram)
+- [Component Diagram](#component-diagram)
+- [Sequence Diagrams](#sequence-diagrams)
+## Interactive Prototype
+<iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="800" height="450" src="https://embed.figma.com/design/hk0bqFHLPL5NcOpYbwDr6x/Untitled?node-id=0-1&embed-host=share" allowfullscreen></iframe>
+## Context Diagram
 ![Context diagram](assets/context_diagram.png)
 | Actor / System | Description | Key Interactions |
 |---|---|---|
@@ -12,7 +17,7 @@ Link to the interactive prototype in Figma.
 | Repository Host (GitHub/GitLab) | External code repositories referenced by teams. | Store/display repo links per team in dashboards. |
 | Identity Provider (University SSO / email whitelist) | Authentication and authorization source. | Server-side login and role assignment (student vs instructor). |
 | Email Service (optional) | Outbound notifications and reminders. | Send course/admin messages if notifications are enabled. |
-## Use case diagram
+## Use Case Diagram
 ![Use case diagram](assets/use_case_diagram.png)
 | Actor | Description | Main Goals |
 |---|---|---|
@@ -23,7 +28,7 @@ Link to the interactive prototype in Figma.
 | **Identity Provider** *(System)* | University SSO or email-whitelist auth. | Authenticate users and provide roles. |
 | **Repository Host** *(System)* | GitHub/GitLab with team repos. | Provide repo links displayed in dashboards. |
 | **Email Service** *(System)* | Outbound mailer used if notifications are enabled. | Deliver reminders and admin messages. |
-### Component diagram
+### Component Diagram
 ![Component diagram](assets/component_diagram.png)
 | Component | Responsibilities |
 |---|---|
@@ -39,6 +44,6 @@ Link to the interactive prototype in Figma.
 | **Repo Registry** | Stores/display team repository links; optional metadata fetch from **Git Host API**. |
 | **Notification Service** | Optional outbound emails (missing review, export ready, etc.) via **Email SMTP/API**; templating and rate limiting. |
 | **File Store (Local)** | Local persistent storage for imported submissions and uploaded review PDFs (self-hosted, privacy-preserving). |
-### Sequence diagrams
+### Sequence Diagrams
 ![Sequence diagram](assets/sequence_1_diagram.png)
 ![Sequence diagram](assets/sequence_2_diagram.png)
