@@ -9,14 +9,16 @@
 - [Interoperability](#interoperability)
 - [Maintainability](#maintainability)
 - [Scalability](#scalability)
+- [Data Integrity](#data-integrity)
+- [Accessibility](#accessibility)
 
 ## Priority Matrix
 
 | Business Importance → <br/> Technical Risk ↓ | Low | Medium | High |
 |-----------------------------------------------|-----|---------|------|
-| **Low**                                       | Custom UI themes | Bulk grade operations | Automated peer review matching|
-| **Medium**                                    | Advanced analytics | Real-time notifications | Moodle CSV export |
-| **High**                                      | SSO integration | PDF annotation features | Multi-language support |
+| **Low**                                       | QAS009 (Custom UI themes) | QAS002 (Bulk grade operations) | **QAS001 (Automated peer review matching)** |
+| **Medium**                                    | QAS007 (Advanced analytics) | QAS003 (Real-time notifications) | QAS005 (Moodle CSV export) |
+| **High**                                      | QAS004 (SSO integration) | QAS008 (PDF annotation features) | QAS006 (Multi-language support) |
 
 **Priority Legend:**
 - **High Priority**: Critical features with high business value and low technical risk
@@ -25,7 +27,7 @@
 
 ## Usability
 ### QAS001
-### Instructor Dashboard Navigation
+#### Automated Peer Review Matching
 - **Source**: Instructor
 - **Stimulus**: Wants to view team grades and review assignments
 - **Artifact**: Web UI
@@ -41,7 +43,7 @@ A/B testing of dashboard layouts with 20 users; collect satisfaction scores (1-5
 
 ## Performance
 ### QAS002
-### Grade Export Response Time
+#### Bulk Grade Operations
 - **Source**: Instructor
 - **Stimulus**: Requests export of grades in Moodle-compatible format
 - **Artifact**: Export service
@@ -57,7 +59,7 @@ Stress test with 500+ student records; verify graceful degradation beyond design
 
 ## Reliability
 ### QAS003
-### System Availability During Peer Review Submission
+#### Real-time Notifications
 - **Source**: Student
 - **Stimulus**: Submits peer review feedback as PDF
 - **Artifact**: File upload service
@@ -73,7 +75,7 @@ Conduct failure recovery testing by simulating server crashes during upload proc
 
 ## Security
 ### QAS004
-### Role-Based Access Control
+#### SSO Integration
 - **Source**: Unauthorized user
 - **Stimulus**: Attempts to access instructor dashboard
 - **Artifact**: Authentication middleware
@@ -89,7 +91,7 @@ Automated security scanning for common vulnerabilities (OWASP Top 10) in authent
 
 ## Interoperability
 ### QAS005
-### Moodle Grade Format Compatibility
+#### Moodle CSV Export
 - **Source**: Instructor
 - **Stimulus**: Exports grades for upload to Moodle
 - **Artifact**: Export module
@@ -105,7 +107,7 @@ Validate CSV format compliance against Moodle's official import specifications.
 
 ## Maintainability
 ### QAS006
-### Code Modularity and Documentation
+#### Multi-language Support
 - **Source**: Development team
 - **Stimulus**: Needs to modify peer review matching algorithm
 - **Artifact**: Source code and documentation
@@ -121,7 +123,7 @@ Measure time taken for new developers to understand and modify key system compon
 
 ## Scalability
 ### QAS007
-### System Performance with Growing User Base
+#### Advanced Analytics
 - **Source**: Multiple concurrent users
 - **Stimulus**: 100+ students simultaneously accessing dashboards during peak hours
 - **Artifact**: Application server and database
@@ -137,7 +139,7 @@ Database performance testing with datasets representing 1000+ students and 10,00
 
 ## Data Integrity
 ### QAS008
-### Grade Calculation Accuracy
+#### PDF Annotation Features
 - **Source**: System administrator
 - **Stimulus**: Processes final grade calculations across multiple review cycles
 - **Artifact**: Grade calculation engine
@@ -153,7 +155,7 @@ Cross-validation of calculated grades against manual spreadsheet calculations.
 
 ## Accessibility
 ### QAS009
-### WCAG Compliance
+#### Custom UI Themes
 - **Source**: Users with disabilities
 - **Stimulus**: Accesses application using screen readers or keyboard navigation
 - **Artifact**: Web application UI
