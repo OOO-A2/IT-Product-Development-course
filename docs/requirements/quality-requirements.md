@@ -16,9 +16,9 @@
 
 | Business Importance → <br/> Technical Risk ↓ | Low | Medium | High |
 |-----------------------------------------------|-----|---------|------|
-| **Low**                                       | QAS009 (Custom UI themes) | QAS002 (Bulk grade operations) | **QAS001 (Automated peer review matching)** |
-| **Medium**                                    | QAS007 (Advanced analytics) | QAS003 (Real-time notifications) | QAS005 (Moodle CSV export) |
-| **High**                                      | QAS004 (SSO integration) | QAS008 (PDF annotation features) | QAS006 (Multi-language support) |
+| **Low**                                       | QAS010 | QAS002 | QAS001 |
+| **Medium**                                    | QAS007 | QAS003 | QAS005 |
+| **High**                                      | QAS004 | QAS008 | QAS006 |
 
 **Priority Legend:**
 - **High Priority**: Critical features with high business value and low technical risk
@@ -32,8 +32,8 @@
 - **Stimulus**: Wants to view team grades and review assignments
 - **Artifact**: Web UI
 - **Environment**: Normal operation
-- **Response**: System displays dashboard with clear sections for grades, teams, and pending reviews within 2 seconds
-- **Response Measure**: 95% of users can navigate to the correct section without assistance
+- **Response**: System displays dashboard with sections for grades, teams, and pending reviews within 2 seconds
+- **Response Measure**: Complete all intended actions on the page without guidance
 
 ### QAST001-1
 Conduct usability testing with 5 instructors performing 10 key tasks; measure success rate and time to completion.
@@ -89,8 +89,38 @@ Penetration testing for role escalation and unauthorized access across all user 
 ### QAST004-2
 Automated security scanning for common vulnerabilities (OWASP Top 10) in authentication flows.
 
-## Interoperability
 ### QAS005
+#### Student Data Isolation and File Access Control
+- **Source**: Student
+- **Stimulus**: Attempts to access another student's grades, reviews, or personal data
+- **Artifact**: Authorization middleware and file access controls
+- **Environment**: Normal system operation
+- **Response**: System denies access and logs the unauthorized attempt
+- **Response Measure**: 100% prevention of cross-student data access; only authorized instructors/admins can access all student files
+
+### QAST005-1
+Simulate student attempts to access other students' data via URL manipulation or API calls; verify access denials.
+
+### QAST005-2
+Conduct file system security testing to ensure only administrators/instructors can access stored files on the server.
+
+### QAS006
+#### Data Protection and Privacy
+- **Source**: System users or external attackers
+- **Stimulus**: Attempts to intercept or access sensitive student data in transit or at rest
+- **Artifact**: Encryption protocols and data storage systems
+- **Environment**: All system environments (development, production)
+- **Response**: Data remains encrypted and inaccessible to unauthorized parties
+- **Response Measure**: 100% of sensitive data encrypted in transit (TLS 1.2+) and at rest (AES-256)
+
+### QAST006-1
+Security audit of data encryption implementations for both database storage and file systems.
+
+### QAST006-2
+Network security testing to verify all data transmissions use secure encrypted channels.
+
+## Interoperability
+### QAS007
 #### Moodle CSV Export
 - **Source**: Instructor
 - **Stimulus**: Exports grades for upload to Moodle
@@ -99,15 +129,15 @@ Automated security scanning for common vulnerabilities (OWASP Top 10) in authent
 - **Response**: System generates a CSV file that is accepted by Moodle without manual reformatting
 - **Response Measure**: 100% of exported files are successfully imported into Moodle
 
-### QAST005-1
+### QAST007-1
 Test export/import cycle with a sample Moodle instance using various grade scenarios.
 
-### QAST005-2
+### QAST007-2
 Validate CSV format compliance against Moodle's official import specifications.
 
 ## Maintainability
-### QAS006
-#### Multi-language Support
+### QAS008
+#### Different Programming Language Support
 - **Source**: Development team
 - **Stimulus**: Needs to modify peer review matching algorithm
 - **Artifact**: Source code and documentation
@@ -115,30 +145,30 @@ Validate CSV format compliance against Moodle's official import specifications.
 - **Response**: Clear module boundaries and documented APIs enable efficient modifications
 - **Response Measure**: Modification time reduced by 40% compared to monolithic codebase
 
-### QAST006-1
+### QAST008-1
 Code review assessing adherence to modular architecture principles and documentation coverage.
 
-### QAST006-2
+### QAST008-2
 Measure time taken for new developers to understand and modify key system components.
 
 ## Scalability
-### QAS007
-#### Advanced Analytics
+### QAS009
+#### Concurrent User Performance
 - **Source**: Multiple concurrent users
-- **Stimulus**: 100+ students simultaneously accessing dashboards during peak hours
+- **Stimulus**: 100 students simultaneously accessing dashboards during peak hours
 - **Artifact**: Application server and database
 - **Environment**: High concurrent load
 - **Response**: System maintains responsive performance under load
 - **Response Measure**: Response times under 3 seconds for 95% of requests at 100 concurrent users
 
-### QAST007-1
+### QAST009-1
 Load testing simulating 100+ concurrent users performing typical student/instructor workflows.
 
-### QAST007-2
-Database performance testing with datasets representing 1000+ students and 10,000+ review records.
+### QAST009-2
+Database performance testing with datasets representing 100 students and 100 review records.
 
 ## Data Integrity
-### QAS008
+### QAS010
 #### PDF Annotation Features
 - **Source**: System administrator
 - **Stimulus**: Processes final grade calculations across multiple review cycles
@@ -147,24 +177,8 @@ Database performance testing with datasets representing 1000+ students and 10,00
 - **Response**: System produces accurate, consistent grade results
 - **Response Measure**: 100% accuracy in grade calculations across all test scenarios
 
-### QAST008-1
+### QAST010-1
 Automated testing of grade calculation algorithms with known input/output datasets.
 
-### QAST008-2
+### QAST010-2
 Cross-validation of calculated grades against manual spreadsheet calculations.
-
-## Accessibility
-### QAS009
-#### Custom UI Themes
-- **Source**: Users with disabilities
-- **Stimulus**: Accesses application using screen readers or keyboard navigation
-- **Artifact**: Web application UI
-- **Environment**: Various assistive technologies
-- **Response**: Application provides equivalent access and functionality
-- **Response Measure**: Meets WCAG 2.1 AA compliance standards
-
-### QAST009-1
-Automated accessibility testing using tools like axe-core with manual verification.
-
-### QAST009-2
-User testing with participants using screen readers and keyboard-only navigation.
