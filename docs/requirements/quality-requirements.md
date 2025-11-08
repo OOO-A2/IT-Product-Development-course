@@ -7,18 +7,16 @@
 - [Reliability](#reliability)
 - [Security](#security)
 - [Interoperability](#interoperability)
-- [Maintainability](#maintainability)
-- [Scalability](#scalability)
 - [Data Integrity](#data-integrity)
-- [Accessibility](#accessibility)
+- [Scalability](#scalability)
 
 ## Priority Matrix
 
 | Business Importance → <br/> Technical Risk ↓ | Low | Medium | High |
 |-----------------------------------------------|-----|---------|------|
-| **Low**                                       | QAS010 | QAS002 | QAS001 |
-| **Medium**                                    | QAS007 | QAS003 | QAS005 |
-| **High**                                      | QAS004 | QAS008 | QAS006 |
+| **Low**                                       | QAS009 | QAS002 | **QAS001** |
+| **Medium**                                    | QAS007 | QAS003 | QAS008 |
+| **High**                                      | QAS004 | QAS005 | QAS006 |
 
 **Priority Legend:**
 - **High Priority**: Critical features with high business value and low technical risk
@@ -36,7 +34,7 @@
 - **Response Measure**: Complete all intended actions on the page without guidance
 
 ### QAST001-1
-Conduct usability testing with 5 instructors performing 10 key tasks; measure success rate and time to completion.
+Conduct usability testing with 2 instructors performing 10 key tasks; measure success rate and time to completion.
 
 ### QAST001-2
 A/B testing of dashboard layouts with 20 users; collect satisfaction scores (1-5 scale).
@@ -110,7 +108,7 @@ Conduct file system security testing to ensure only administrators/instructors c
 - **Stimulus**: Attempts to intercept or access sensitive student data in transit or at rest
 - **Artifact**: Encryption protocols and data storage systems
 - **Environment**: All system environments (development, production)
-- **Response**: Data remains encrypted and inaccessible to unauthorized parties
+- **Response**: Machine where data is stored is isolated from unauthorized access
 - **Response Measure**: 100% of sensitive data encrypted in transit (TLS 1.2+) and at rest (AES-256)
 
 ### QAST006-1
@@ -135,21 +133,24 @@ Test export/import cycle with a sample Moodle instance using various grade scena
 ### QAST007-2
 Validate CSV format compliance against Moodle's official import specifications.
 
-## Maintainability
+## Data Integrity
 ### QAS008
-#### Different Programming Language Support
-- **Source**: Development team
-- **Stimulus**: Needs to modify peer review matching algorithm
-- **Artifact**: Source code and documentation
-- **Environment**: Development phase
-- **Response**: Clear module boundaries and documented APIs enable efficient modifications
-- **Response Measure**: Modification time reduced by 40% compared to monolithic codebase
+#### Grade Calculation Accuracy
+- **Source**: Instructor or System Administrator
+- **Stimulus**: Initiates final grade calculation process at semester end
+- **Artifact**: Grade calculation engine and database
+- **Environment**: High-stakes grading period with multiple review cycles and bonus points
+- **Response**: System computes final grades using correct formulas, applies all weighting factors consistently, and preserves calculation integrity across all student records
+- **Response Measure**: 100% accuracy in grade calculations verified against manual audit; zero discrepancies in 1000+ student records
 
 ### QAST008-1
-Code review assessing adherence to modular architecture principles and documentation coverage.
+Automated regression testing of grade calculation algorithms with comprehensive test datasets covering edge cases and complex weighting scenarios.
 
 ### QAST008-2
-Measure time taken for new developers to understand and modify key system components.
+Cross-validation audit comparing system-calculated grades against independent manual calculations for a representative sample of student records.
+
+### QAST008-3
+Data consistency checks to ensure grade calculations remain stable and reproducible across multiple calculation runs.
 
 ## Scalability
 ### QAS009
@@ -166,19 +167,3 @@ Load testing simulating 100+ concurrent users performing typical student/instruc
 
 ### QAST009-2
 Database performance testing with datasets representing 100 students and 100 review records.
-
-## Data Integrity
-### QAS010
-#### PDF Annotation Features
-- **Source**: System administrator
-- **Stimulus**: Processes final grade calculations across multiple review cycles
-- **Artifact**: Grade calculation engine
-- **Environment**: End-of-semester grading
-- **Response**: System produces accurate, consistent grade results
-- **Response Measure**: 100% accuracy in grade calculations across all test scenarios
-
-### QAST010-1
-Automated testing of grade calculation algorithms with known input/output datasets.
-
-### QAST010-2
-Cross-validation of calculated grades against manual spreadsheet calculations.
