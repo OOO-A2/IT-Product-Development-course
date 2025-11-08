@@ -1,0 +1,39 @@
+@startuml
+title PeerPilot – Context Diagram
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+
+actor "Student / Team" as STU
+actor "Instructor / TA" as TA
+
+rectangle "PeerPilot (self-hosted)" as PP {
+  component "Instructor Dashboard" as DIR
+  component "Student Dashboard" as SDR
+  component "Pairing & Matching" as PM
+  component "Grading Engine" as GL
+  component "Moodle Exporter" as EX
+  component "Storage Adapter" as SA
+  component "Auth Service" as AU
+}
+
+rectangle "Moodle" as MOODLE
+rectangle "Storage (Google Drive / Yandex / Local)" as STORE
+
+STU --> AU
+TA --> AU
+STU --> SDR
+TA  --> DIR
+DIR  --> PM
+PM  --> SDR
+STORE --> SA
+SA --> STORE
+SDR --> SA
+SA --> SDR
+DIR --> GL
+DIR --> EX
+GL  --> SDR
+EX  --> MOODLE
+
+@enduml

@@ -1,0 +1,41 @@
+@startuml
+title US-1: Generate peer-review pairs and expose targets
+
+actor "Instructor / TA" as TA
+participant "Web App" as UI
+participant "API Backend" as API
+participant "Team & User Management" as TeamMgr
+participant "Peer Review & Matching Service" as Match
+participant "Storage Adapter" as SA
+participant "Storage Provider" as Storage
+database "DB" as DB
+
+== Trigger ==
+TA -> UI : Click "Generate pairings" (assignment)
+
+UI -> API : POST /assignments/{id}/pairings
+API -> TeamMgr : getLockedTeams(assignment)
+TeamMgr --> API : teams
+
+== (Optional) align with stored submissions ==
+API -> SA : listSubmissions(assignment)
+SA -> Storage : fetch metadata
+Storage --> SA : files
+SA --> API : normalized submissions
+API -> DB : upsert(submission metadata)
+
+== Generate & persist pairs ==
+API -> Match : generatePairs(assignment, teams)
+Match -> Match : build mapping\navoid repeats
+Match -> DB : save(pairings)
+DB --> Match : ok
+Match --> API : summary
+
+API --> UI : 201 Created + pairing summary
+
+note over TA, UI
+On next dashboard load,
+teams see their target team
+and links resolved via stored metadata.
+end note
+@enduml

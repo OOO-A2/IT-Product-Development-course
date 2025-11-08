@@ -1,0 +1,63 @@
+@startuml
+title PeerPilot – Use Case Diagram
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BorderColor #777
+  ArrowColor  #777
+}
+
+actor "Student / Team" as A_Student
+actor "Instructor / TA" as A_TA
+
+actor "Storage (Google Drive / Yandex / Local)" as A_Storage
+
+rectangle "PeerPilot (Self-Hosted)" {
+
+  (Login with email link) as UC_Login
+
+  (View Team Grade) as UC_ViewTeam
+  (View Personal Standing) as UC_ViewPersonal
+  (See Assigned Review Target) as UC_AssignTarget
+  (Download Submission / Target PDF) as UC_DownloadFile
+  (Upload Peer Review PDF) as UC_UploadReview
+  (View Peer Review Status) as UC_ViewStatus
+
+  (All-Teams Gradebook) as UC_AllTeams
+  (Manage & Lock Teams) as UC_ManageTeams
+  (Generate Peer Review Pairings) as UC_Pairings
+  (Bulk Import Submissions) as UC_ImportSubs
+  (Edit Bonus / Extra Points) as UC_EditBonus
+  (Configure Grading Rules) as UC_ConfigGrading
+  (Export Grades CSV) as UC_ExportCSV
+}
+
+A_Student --> UC_Login
+A_Student --> UC_ViewTeam
+A_Student --> UC_ViewPersonal
+A_Student --> UC_AssignTarget
+A_Student --> UC_DownloadFile
+A_Student --> UC_UploadReview
+A_Student --> UC_ViewStatus
+
+A_TA --> UC_Login
+A_TA --> UC_AllTeams
+A_TA --> UC_ManageTeams
+A_TA --> UC_Pairings
+A_TA --> UC_ImportSubs
+A_TA --> UC_EditBonus
+A_TA --> UC_ConfigGrading
+A_TA --> UC_ViewStatus
+A_TA --> UC_ExportCSV
+
+UC_ImportSubs --> A_Storage
+UC_UploadReview --> A_Storage
+UC_DownloadFile --> A_Storage
+
+UC_AllTeams ..> UC_ViewStatus : <<include>>
+UC_AllTeams ..> UC_EditBonus : <<include>>
+UC_Pairings ..> UC_AssignTarget : <<results in>>
+UC_AssignTarget ..> UC_DownloadFile : <<include>>
+
+@enduml

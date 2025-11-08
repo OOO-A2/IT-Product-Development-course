@@ -1,0 +1,51 @@
+@startuml
+title US-2: Student views dashboard and uploads peer-review PDF
+
+actor "Student" as Stu
+participant "Web App" as UI
+participant "API Backend" as API
+participant "Auth & Session Service" as Auth
+participant "Grading Service" as Grade
+participant "Peer Review & Matching Service" as Review
+participant "Storage Adapter" as SA
+participant "Storage Provider" as Storage
+database "DB" as DB
+
+== Session check ==
+Stu -> UI : Open dashboard
+UI -> API : GET /me (cookie)
+API -> Auth : validateSession(cookie)
+Auth --> API : user{id, team}
+API --> UI : 200 OK
+
+== View grades & targets ==
+UI -> API : GET /dashboard
+API -> Grade : getStanding(team)
+Grade -> DB : loadScoresAndBonuses(team)
+DB --> Grade : data
+Grade --> API : teamStanding, personalStanding
+API -> Review : getAssignments(team)
+Review -> DB : loadPairingsAndStatus(team)
+DB --> Review : targets, status, fileUrls
+Review --> API : targets, status, fileUrls
+API --> UI : 200 {standing, targets, status, fileUrls}
+
+== Upload peer-review PDF ==
+Stu -> UI : Upload review.pdf for targetTeam
+UI -> API : POST /reviews {assignment, targetTeam, file}
+API -> Review : createOrUpdateReviewMeta(user, team, targetTeam, assignment)
+Review -> SA : upload(file, path)
+SA -> Storage : PUT review.pdf
+Storage --> SA : ok + url
+SA --> Review : url
+Review -> DB : save(status=submitted, fileUrl=url)
+DB --> Review : ok
+Review --> API : {status:submitted, fileUrl:url}
+API --> UI : 201 Created {status:submitted, fileUrl:url}
+
+note over UI
+Dashboard row updates:
+status = Submitted,
+link = fileUrl.
+end note
+@enduml

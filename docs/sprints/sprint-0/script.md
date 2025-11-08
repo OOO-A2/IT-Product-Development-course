@@ -1,5 +1,3 @@
-
-=======
 ---
 layout: default
 nav_order: 2
@@ -12,7 +10,6 @@ title: "Script"
 
 "What goals is your current solution (spreadsheet) supposed to solve? What problem does it address?"
 
->>>>>>> 7fa8ebd84219c520c06174d336863dac211b6d4a
 ## 2. About the Spreadsheet:
 
 "Could you walk us through how the spreadsheet is typically updated? What triggers an update?"
