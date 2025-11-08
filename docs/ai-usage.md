@@ -15,3 +15,5 @@ nav_order: 10
     - Bootstraping of Hello world projects, dockerizatio (Dockerfiles generation), quick minor errors fixing.
     - Collecting information about quality requirements suitable for our project.
     - Checking plan for grammar mistakes.
+    - To structure and organize the interview questions. It helped us focus on analyzing the content rather than on manual tasks.
+    - To transcribe the audio recordings, which saved time and improved accuracy compared to manual transcription.
