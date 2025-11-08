@@ -17,11 +17,6 @@ title: "Tech Stack"
     - Router - most popular React routing solution;
     - Tailwind CSS - rapid and consistend design.
 
-
-## Backend
-
-# Tech Stack
-
 ## Backend
 
 - Python 3.11+ – mature, familiar language with rich ecosystem, great support for FastAPI, async I/O, testing, and deployment in self-hosted environments;
