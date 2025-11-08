@@ -1,3 +1,11 @@
+---
+layout: default
+title: "Sprint 1"
+nav_order: 2
+has_children: true
+permalink: /sprints/sprint-1/
+---
+
 1. 06.11.2025
 
 2. https://drive.google.com/file/d/1hPqRuNfEx_pL84KtUeuzXkwkg6PoFlRu/view?usp=sharing
