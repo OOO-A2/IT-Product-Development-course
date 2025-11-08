@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Sprint 1"
+title: "script"
 nav_order: 2
 has_children: true
 permalink: /sprints/sprint-1/
