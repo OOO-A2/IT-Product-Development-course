@@ -74,10 +74,4 @@ The platform is designed to be self-hosted, ensuring confidentiality and complia
 
 ## Documentation
 
-The repo is organized as follows:
-- [Sprints folder](docs/sprints) - List of folders for each sprint. 
-    - **Sprint-0 contains**
-    - Details on [meetings](docs/sprints/sprint-0/meeting-1.md) with a customer
-    - [Summary report](docs/sprints/sprint-0/report.md)
-    - Customer interview [script](docs/sprints/sprint-0/script.md)
-- [AI usage](docs/ai-usage.md) - Details on how AI helped to increase efficiency in each sprint.
+The documentation is available online via [the link](https://ooo-a2.github.io/IT-Product-Development-course/)

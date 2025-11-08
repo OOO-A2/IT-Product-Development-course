@@ -1,3 +1,11 @@
+---
+layout: default
+title: "Architecture"
+nav_order: 2
+has_children: true
+permalink: /architecture/
+---
+
 ## Table of Contents
 - [Interactive Prototype](#interactive-prototype)
 - [Context Diagram](#context-diagram)

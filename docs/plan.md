@@ -1,3 +1,9 @@
+---
+layout: default
+title: "Strategic Plan"
+nav_order: 1
+---
+
 # Strategic Plan
 
 ## Table of Contents

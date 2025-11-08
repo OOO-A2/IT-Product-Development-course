@@ -1,3 +1,10 @@
+---
+layout: default
+title: "Quality requirements"
+nav_order: 2
+permalink: /requirements/qa/
+---
+
 # Quality Requirements
 
 ## Table of Contents

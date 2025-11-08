@@ -1,3 +1,9 @@
+---
+layout: default
+title: "AI usage"
+nav_order: 10
+---
+
 ## Report on how we used AI during:
 1. Sprint 0:
     - To collect information about existing solutions, that can be used to track progress in study courses. 
