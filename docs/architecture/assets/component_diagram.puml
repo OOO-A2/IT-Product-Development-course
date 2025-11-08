@@ -1,0 +1,40 @@
+@startuml
+title PeerPilot — Component Diagram (Refined)
+left to right direction
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+[Storage Provider\n(Google Drive / Yandex / Local)] as Storage
+[Email Service\n(for login links)] as Email
+
+package "PeerPilot (Self-Hosted)" {
+
+  [Web App (Student & Instructor UI)] as WebUI
+  [API Backend] as API
+
+  [Auth & Session Service] as Auth
+  [Team & User Management] as TeamMgr
+  [Peer Review & Matching Service] as ReviewSvc
+  [Grading Service] as Grading
+  [Storage Adapter] as StorageAdapter
+  [Export Service (CSV for Moodle)] as ExportCSV
+}
+
+WebUI --> API : HTTPS (REST)
+
+API --> Auth
+API --> TeamMgr
+API --> ReviewSvc
+API --> Grading
+API --> StorageAdapter
+API --> ExportCSV
+
+ReviewSvc --> StorageAdapter : read/write review PDFs
+Grading --> TeamMgr : teams, roles
+ExportCSV --> Grading : final grades snapshot
+ExportCSV --> TeamMgr : student mapping
+
+Auth --> Email : send magic login link
+StorageAdapter --> Storage : import submissions,\nstore/retrieve PDFs
+
+@enduml
