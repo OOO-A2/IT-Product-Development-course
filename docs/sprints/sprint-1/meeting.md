@@ -2,7 +2,7 @@
 layout: default
 title: "Meeting 1"
 nav_order: 2
-permalink: /sprints/sprint-1/
+parent: "Sprint 1"
 ---
 
 1. 06.11.2025
