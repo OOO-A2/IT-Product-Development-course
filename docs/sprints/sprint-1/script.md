@@ -2,7 +2,7 @@
 layout: default
 title: "Script"
 nav_order: 2
-permalink: /sprints/sprint-1/
+parent: "Sprint 1"
 ---
 
 # Second Customer Interview Script - Interactive IT Product Dev Course
