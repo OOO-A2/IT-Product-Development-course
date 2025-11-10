@@ -1,8 +1,7 @@
 ---
 layout: default
-title: "meeting"
+title: "Meeting 1"
 nav_order: 2
-has_children: true
 permalink: /sprints/sprint-1/
 ---
 
