@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "report"
+title: "Sprint 1"
 nav_order: 2
 has_children: true
 permalink: /sprints/sprint-1/
