@@ -20,6 +20,7 @@ export default function InstructorPeerReview() {
       reviewLink: 'https://drive.google.com/file/d/abc123/view',
       status: 'submitted',
       submittedAt: new Date('2024-01-15'),
+      dueDate: null,
     },
     {
       id: 'pr2',
@@ -29,6 +30,7 @@ export default function InstructorPeerReview() {
       reviewLink: '',
       status: 'pending',
       submittedAt: null,
+      dueDate: null,
     },
     {
       id: 'pr3',
@@ -38,6 +40,7 @@ export default function InstructorPeerReview() {
       reviewLink: 'https://drive.google.com/file/d/def456/view',
       status: 'submitted',
       submittedAt: new Date('2024-01-16'),
+      dueDate: null,
     },
     {
       id: 'pr4',
@@ -47,6 +50,7 @@ export default function InstructorPeerReview() {
       reviewLink: '',
       status: 'pending',
       submittedAt: null,
+      dueDate: null,
     },
   ]);
 

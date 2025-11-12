@@ -24,8 +24,17 @@ export interface PeerReview {
   reviewingTeamId: string
   reviewedTeamId: string
   reviewLink: string | null
-  status: 'submitted' | 'pending'
+  status: 'submitted' | 'pending' | 'graded'
   submittedAt: Date | null
+  dueDate: Date | null
+}
+
+export interface StudentDashboardProps {
+  student: Student;
+  teams: Team[];
+  students: Student[];
+  grades: Grade[];
+  reviewAssignments: PeerReview[];
 }
 
 export type AssignmentLetter = 'A' | 'R' | 'I' | 'C'
