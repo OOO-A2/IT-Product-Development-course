@@ -13,14 +13,12 @@ A self-hosted platform to automate peer reviews, track grades, and streamline co
 
 ### Sprints
 
-#### [Sprint 0](./sprints/sprint-0/index.html)
-- [Meeting 1](./sprints/sprint-0/meeting-1.html)
-- [Script](./sprints/sprint-0/script.html)
+Sprints are groups by folders like Sprint 0 and Sprint 1.
 
-#### Sprint 1
-
-### Architecture
+### Main docs
 - [Tech Stack](./architecture/tech-stack.html)
+- [Diagrams](./architecture)
+- [Quality Requirements](./requirements/qa/)
 
 ### Assets
 - [Project Logo](./assets/peerpilot-logo.svg)
