@@ -1,8 +1,13 @@
 import { Users } from "lucide-react"
 import type { Team } from "../../types/types"
 
-export default function TeamFilter(p: {teams: Team[], selectedTeam: any, setSelectedTeam: any}) {
-    const [teams, selectedTeam, setSelectedTeam] = [p.teams, p.selectedTeam, p.setSelectedTeam]
+type TeamFilterProps = {
+  teams: Team[]
+  selectedTeam: any
+  setSelectedTeam: any
+}
+
+export default function TeamFilter({teams, selectedTeam, setSelectedTeam}: TeamFilterProps) {
     return <div className="relative">
               <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <select

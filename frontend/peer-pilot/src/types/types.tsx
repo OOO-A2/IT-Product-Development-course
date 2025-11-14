@@ -49,3 +49,11 @@ export const assignmentNames = {
     I: 'Implementation',
     C: 'Coordination'
   };
+
+  export interface TeamGrade {
+  teamId: string;
+  sprint: number;
+  assignment: 'A' | 'R' | 'I' | 'C';
+  score: number;
+  comments?: string;
+}
