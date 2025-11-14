@@ -1,8 +1,9 @@
 ---
 layout: default
-title: "Retrospective"
+title: "Sprint 2"
 nav_order: 2
-parent: "Sprint 2"
+has_children: true
+permalink: /sprints/sprint-2/
 ---
 
 # Sprint 2 Retrospective
