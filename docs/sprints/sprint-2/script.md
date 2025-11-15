@@ -8,73 +8,88 @@ title: "Script"
 ## 1. Introduction
 "Thank you for meeting with us today. We want to understand your current workflow and challenges to build something that truly helps professors and the TAs. We'll be recording for our notes and may ask follow-up questions about specific experiences".
 
+## Login Page
+
+### What we show:
+
+Basic login interface without functionality
+
+### Key discussion points
+
+- "Is this layout sufficient for our initial version?"
+
+- "Should we add any additional fields or information here?"
+
 ## Dashboard Demo Structure
 
-- "When we show the main grading table, what information would be most valuable to see populated?"
+### What we show:
 
-- "Should we demonstrate with real student data or placeholder data?"
+Scrollable grades table with all student data
 
-- "What's the first action you'd typically take when opening a grading dashboard?"
+Export to CSV and save functionality
 
-## Feature Prioritization for Demo
+Current column structure (average calculations)
 
-- "If we only have 30 minutes, which 3 features are absolutely essential to see?"
+### Key discussion points:
 
-- "What's the most critical workflow we need to validate today?"
+- "Should we add an 'Extra' column for each week?"
 
-- "Should we focus on the most common use cases or edge cases first?"
+- "Currently shows individual students - should we switch to team view first?"
 
-## Navigation & Flow
+## Team Grading Page
 
-- "How do you typically move between different grading tasks in your current workflow?"
+### What we show:
 
-- "When grading teams, do you usually work team-by-team or assignment-by-assignment?"
+Separate page for grading teams by sprint
 
-- "What information do you need to see together vs. separately?"
+Team list with A/R/I/C grade inputs
 
-## Integration Points
+### Key discussion points:
 
-- "Where should we start the story: at the beginning of the grading process or with the final results?"
+- "Should this be a separate page or integrated into the main dashboard?"
 
-- "How important is it to see the connection between peer reviews and final grades?"
+- "If we combine two pages, should we use collapse/expand for teams?"
 
-- "Should we demonstrate the export functionality early or save it for the end?"
+## Student View Page
 
-## Feedback Collection Approach
+### What we show:
 
-- "As we go through each section, what type of feedback would be most helpful?"
+Student's personal grade view
 
-- "Should we pause after each major feature or do a complete walkthrough first?"
+Team members display
 
-- "What's the best way for you to give feedback - comments as we go, or summarized at the end?"
+Peer review assignments
 
-## Decision-Making Flow
+### Key discussion points:
 
-- "When we show alternative approaches, how do you prefer to evaluate them?"
+- "What's missing from this student view?"
 
-- "Should we present options side-by-side or sequentially?"
+- "Should students see individual vs team grades differently?"
 
-- "What information do you need to make decisions about feature preferences?"
+- "How should peer review assignments be displayed?"
 
-## Technical Depth
+## Peer Review Management
 
-- "How technical should we get with the implementation details?"
+### What we show:
 
-- "Do you want to see the mobile responsiveness early or focus on desktop first?"
+Table showing which team reviews which team
 
-- "Should we include backend considerations or stick to frontend user experience?"
+Status indicators and view document links
 
-## Use Case Coverage
+Current grading interface
 
-- "Should we walk through a specific scenario (like end-of-sprint grading) or show general capabilities?"
+### Key discussion points:
 
-- "What's the most complex grading situation we should demonstrate?"
+- "How should document links be managed (Google Drive vs platform)?"
 
-- "How important is it to see both individual and team grading workflows?"
+- "Should teams submit grades through the platform or just in PDFs?"
 
-## Closing & Next Steps
-- "After seeing the demo, what's the most important question we should answer?"
+- "What grading workflow works best for instructors?"
 
-- "What information would help you prioritize what we build next?"
+## Conclusion
 
-- "Who else needs to see this before we can make decisions?"
+- "So to summarize: dashboard changes, remove separate team page, add peer review columns?"
+
+- "Which of these should be highest priority for implementation?"
+
+- "Any other pages or flows we missed?"
