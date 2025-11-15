@@ -1,0 +1,59 @@
+export interface Student {
+  id: string
+  name: string
+  email: string
+  teamId: string
+}
+
+export interface Grade {
+  studentId: string
+  sprint: number
+  assignment: 'A' | 'R' | 'I' | 'C'
+  score: number
+}
+
+export interface Team {
+  id: string
+  name: string
+  color: string
+}
+
+export interface PeerReview {
+  id: string
+  sprint: number
+  reviewingTeamId: string
+  reviewedTeamId: string
+  reviewLink: string | null
+  status: 'submitted' | 'pending' | 'graded'
+  submittedAt: Date | null
+  dueDate: Date | null
+}
+
+export interface StudentDashboardProps {
+  student: Student;
+  teams: Team[];
+  students: Student[];
+  grades: Grade[];
+  reviewAssignments: PeerReview[];
+}
+
+export type AssignmentLetter = 'A' | 'R' | 'I' | 'C'
+
+export type Assignments = Array<AssignmentLetter> 
+
+export const assignments: Assignments = ['A', 'R', 'I', 'C'];
+
+export const assignmentNames = {
+    A: 'Assignment',
+    R: 'Peer review',
+    I: 'Implementation',
+    C: 'Coordination'
+  };
+
+  export interface TeamGrade {
+  teamId: string;
+  sprint: number;
+  assignment: 'A' | 'R' | 'I' | 'C';
+  score: number;
+  comments?: string;
+}
