@@ -12,6 +12,7 @@ permalink: /architecture/
 - [Use Case Diagram](#use-case-diagram)
 - [Component Diagram](#component-diagram)
 - [Sequence Diagrams](#sequence-diagrams)
+- [Architectural Decisions](#architectural-decisions)
 ## Interactive Prototype
 [Open the Figma prototype](https://www.figma.com/proto/hk0bqFHLPL5NcOpYbwDr6x/Untitled?node-id=0-1&t=UeW5SXTSeFen4Ni6-1)
 ## Context Diagram
@@ -46,3 +47,12 @@ permalink: /architecture/
 ### Sequence Diagrams
 ![Sequence diagram](assets/sequence_1_diagram.png)
 ![Sequence diagram](assets/sequence_2_diagram.png)
+### Architectural Decisions
+
+| Driver | Decision | Rationale | Discarded Alternatives |
+|--------|----------|-----------|------------------------|
+| PRIV-1: Data privacy & on-prem constraint | **Self-hosted deployment via Docker + docker-compose** | - Keeps grades/files on university hardware<br>- Simple ops model for TA/IT to run locally<br>- Reproducible environments | - Managed cloud PaaS: violates “no external server” requirement<br>- Kubernetes: overkill/ops burden for MVP |
+| SIMP-1: Ship fast, small team | **Monolithic FastAPI app (Python 3.11) with SQLAlchemy/Alembic & PostgreSQL** | - Minimal moving parts; easier debugging and testing<br>- Strong ecosystem, known by team<br>- Alembic gives safe schema evolution | - Microservices: too much infra/coordination overhead<br>- NoSQL-first: weak relational modeling for grades/teams |
+| AUTH-1: Low-friction, simple auth | **Email + password login with signed session cookies (bcrypt/argon2 hashing)** | Straightforward UX; easy to implement and audit; no external IdP; secure with proper hashing and session TTL/rotation. | Magic-link/passwordless (extra email flow and deliverability concerns); University SSO/OAuth (bureaucratic setup, not MVP-ready). |
+| FILE-1: All artifacts in external storage | **Storage Adapter abstraction over Google Drive / Yandex / Local** | - One code path for import/upload/download<br>- Pluggable provider; avoids vendor lock-in<br>- Aligns with “all files live in storage” rule | - Binding to a single provider SDK: hard to switch later<br>- Storing files in DB: bloats DB, complicates backups |
+| INT-1: LMS integration scope control | **Export Moodle-compatible CSV (manual upload), no Moodle API in MVP** | - Meets core need with minimal risk<br>- Works offline/self-hosted; fewer secrets/SSL hurdles<br>- Faster to implement & support | - Direct Moodle API sync: higher complexity & failure modes<br>- Spreadsheet copy/paste: error-prone, time-consuming |
