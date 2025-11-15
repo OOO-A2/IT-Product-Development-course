@@ -9,4 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Login Page, Team Grading Dashboard, Grading Dashboard, Peer Review Management Page, Student Dashboard
+- Login page, team grading dashboard, grading dashboard, peer review management page, student dashboard
+- Quality requirements
+- Interactive prototype
+- High-level architecture diagrams
