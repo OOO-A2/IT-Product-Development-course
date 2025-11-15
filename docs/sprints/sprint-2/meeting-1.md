@@ -5,12 +5,14 @@ parent: "Sprint 2"
 title: "Meeting 1"
 ---
 
-1. 13.10.2025 6 pm
+1. # Meeting Time: 13.10.2025 6 pm
 
-2. Audio recirding:
+2. # Recordings
+
+## Audio recirding:
 https://drive.google.com/file/d/1sMcfLFwssvVzKdsUf2Ff_Lz-7ZRRTaMK/view?usp=drive_link
 
-Video recording: 
+## Video recording: 
 https://drive.google.com/file/d/129HxIwH00XgQ3O8BlQLvEXQxYytHZ7A_/view?usp=sharing
 
 3. # Action Points
@@ -96,7 +98,8 @@ The meeting focused on reviewing the frontend design for a grading platform, pri
 ## Next Steps
 The team will proceed with implementing the collapsible table design, adding the required columns for peer reviews, and discussing open questions about individual grading with Denis. The peer feedback system is marked as medium priority for future iterations.
 
-4. Speakers:
+4. # Speakers:
 Danila Danko, @system205, @rayderdo, @dar_verda
 
-5. https://docs.google.com/document/d/1UHC-vz4FsdHnOoYdh1L_B-EoC5kLrkvc5uuGyZvDBz4/edit?usp=sharing
+5. # Meeting transcription
+https://docs.google.com/document/d/1UHC-vz4FsdHnOoYdh1L_B-EoC5kLrkvc5uuGyZvDBz4/edit?usp=sharing
