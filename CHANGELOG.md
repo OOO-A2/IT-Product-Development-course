@@ -9,5 +9,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Login Page, Team Grading Dashboard, Grading Dashboard, Peer Review Management Page, Student Dashboard 
-- Required API endpoints for Grading Dashboard
+- Login Page, Team Grading Dashboard, Grading Dashboard, Peer Review Management Page, Student Dashboard
