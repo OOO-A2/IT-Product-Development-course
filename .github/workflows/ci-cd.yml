@@ -56,7 +56,37 @@ jobs:
       - name: Add coverage to job summary
         working-directory: frontend/peer-pilot
         run: |
-            COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
+            COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '"pct":[0-9]*' | grep -o '[0-9]*$' | tail -1 )
             echo "### Test Coverage Results" >> $GITHUB_STEP_SUMMARY
-            echo "📊 **Coverage: $COVERAGE_PCT%**" >> $GITHUB_STEP_SUMMARY
-            echo "✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
+            echo "✅ All tests passed with $COVERAGE_PCT% coverage!" >> $GITHUB_STEP_SUMMARY
+
+      
+  update-badge:
+      runs-on: ubuntu-latest
+      needs: test
+      if: github.ref == 'refs/heads/main'
+      permissions:
+        contents: write
+        pull-requests: write
+      steps:
+      - uses: actions/checkout@v4
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: frontend/peer-pilot/coverage/
+
+      - name: Generate coverage badge
+        uses: tj-actions/coverage-badge-js@v2
+        with:
+          report_path: frontend/peer-pilot/coverage/coverage-summary.json
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          base: "main"
+          title: "Updated coverage badge"
+          branch: "chore/update-coverage-badge"
+          commit-message: "Updated coverage badge."
+          body: "Updated coverage badge."
+          token: ${{ secrets.SYSTEMPAT }}
