@@ -1,0 +1,62 @@
+name: CI
+on: [push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache-dependency-path: frontend/peer-pilot/package-lock.json 
+          node-version: '25'
+          cache: 'npm'
+      - name: Install dependencies
+        working-directory: frontend/peer-pilot
+        run: npm install
+      - name: Run ESLint
+        working-directory: frontend/peer-pilot
+        run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:  
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache-dependency-path: frontend/peer-pilot/package-lock.json
+          node-version: '25'
+          cache: 'npm'
+      - working-directory: frontend/peer-pilot
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: frontend/peer-pilot
+        run: npm test -- --coverage --watch=false
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: frontend/peer-pilot/coverage/
+          retention-days: 30
+
+      - name: Check coverage threshold
+        working-directory: frontend/peer-pilot
+        run: |
+            COVERAGE_THRESHOLD=30
+            COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '"pct":[0-9]*' | grep -o '[0-9]*$' | tail -1 )
+            echo "Current coverage: $COVERAGE_PCT%"
+            echo "Required threshold: $COVERAGE_THRESHOLD%"
+            if [ $(echo "$COVERAGE_PCT < $COVERAGE_THRESHOLD" | bc -l) -eq 1 ]; then
+              echo "❌ Coverage below threshold"
+            else
+              echo "✅ Coverage check passed"
+            fi  
+
+      - name: Add coverage to job summary
+        working-directory: frontend/peer-pilot
+        run: |
+            COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
+            echo "### Test Coverage Results" >> $GITHUB_STEP_SUMMARY
+            echo "📊 **Coverage: $COVERAGE_PCT%**" >> $GITHUB_STEP_SUMMARY
+            echo "✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
