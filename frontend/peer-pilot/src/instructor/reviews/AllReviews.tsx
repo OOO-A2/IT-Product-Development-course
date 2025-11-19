@@ -1,86 +1,20 @@
 import { useState } from 'react';
-import { Search, Save, Calendar, ExternalLink, FileText, Clock } from 'lucide-react';
+import { Search, Save, Calendar, ExternalLink, FileText, Clock, Edit, Check, X } from 'lucide-react';
 import type { Grade, Student, Team, PeerReview } from '../../types/types';
+import { mockGrades, mockReviews, mockStudents, mockTeams } from '../../data/mock';
 
 export default function InstructorPeerReview() {
   // Mock data
-  const [teams] = useState<Team[]>([
-    { id: 't1', name: 'Team Alpha', color: 'bg-blue-500' },
-    { id: 't2', name: 'Team Beta', color: 'bg-green-500' },
-    { id: 't3', name: 'Team Gamma', color: 'bg-purple-500' },
-    { id: 't4', name: 'Team Delta', color: 'bg-orange-500' },
-  ]);
-
-  const [peerReviews] = useState<PeerReview[]>([
-    {
-      id: 'pr1',
-      sprint: 1,
-      reviewingTeamId: 't1',
-      reviewedTeamId: 't2',
-      reviewLink: 'https://drive.google.com/file/d/abc123/view',
-      status: 'submitted',
-      submittedAt: new Date('2024-01-15'),
-      dueDate: null,
-    },
-    {
-      id: 'pr2',
-      sprint: 1,
-      reviewingTeamId: 't2',
-      reviewedTeamId: 't3',
-      reviewLink: '',
-      status: 'pending',
-      submittedAt: null,
-      dueDate: null,
-    },
-    {
-      id: 'pr3',
-      sprint: 1,
-      reviewingTeamId: 't3',
-      reviewedTeamId: 't1',
-      reviewLink: 'https://drive.google.com/file/d/def456/view',
-      status: 'submitted',
-      submittedAt: new Date('2024-01-16'),
-      dueDate: null,
-    },
-    {
-      id: 'pr4',
-      sprint: 1,
-      reviewingTeamId: 't4',
-      reviewedTeamId: 't1',
-      reviewLink: '',
-      status: 'pending',
-      submittedAt: null,
-      dueDate: null,
-    },
-  ]);
-
-  const [grades, setGrades] = useState<Grade[]>([
-    // Peer review grades (R assignment)
-    { studentId: 's1', sprint: 1, assignment: 'R', score: 85 },
-    { studentId: 's2', sprint: 1, assignment: 'R', score: 85 },
-    { studentId: 's3', sprint: 1, assignment: 'R', score: 85 },
-    { studentId: 's4', sprint: 1, assignment: 'R', score: 0 }, // Not submitted yet
-    { studentId: 's5', sprint: 1, assignment: 'R', score: 0 },
-    { studentId: 's6', sprint: 1, assignment: 'R', score: 0 },
-    // Add more grades
-  ]);
-
-  const [students] = useState<Student[]>([
-    { id: 's1', name: 'Alice Johnson', email: 'alice@example.com', teamId: 't1' },
-    { id: 's2', name: 'Bob Smith', email: 'bob@example.com', teamId: 't1' },
-    { id: 's3', name: 'Carol Williams', email: 'carol@example.com', teamId: 't1' },
-    { id: 's4', name: 'David Brown', email: 'david@example.com', teamId: 't2' },
-    { id: 's5', name: 'Emma Davis', email: 'emma@example.com', teamId: 't2' },
-    { id: 's6', name: 'Frank Miller', email: 'frank@example.com', teamId: 't2' },
-    { id: 's7', name: 'Grace Wilson', email: 'grace@example.com', teamId: 't3' },
-    { id: 's8', name: 'Henry Moore', email: 'henry@example.com', teamId: 't3' },
-    { id: 's9', name: 'Ivy Taylor', email: 'ivy@example.com', teamId: 't4' },
-    { id: 's10', name: 'Jack Anderson', email: 'jack@example.com', teamId: 't4' },
-  ]);
+  const [teams] = useState<Team[]>(mockTeams);
+  const [peerReviews, setPeerReviews] = useState<PeerReview[]>(mockReviews);
+  const [grades, setGrades] = useState<Grade[]>(mockGrades);
+  const [students] = useState<Student[]>(mockStudents);
 
   const [selectedSprint, setSelectedSprint] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingGrades, setEditingGrades] = useState<{ [key: string]: boolean }>({});
+  const [editingReportLinks, setEditingReportLinks] = useState<{ [key: string]: boolean }>({});
+  const [reportLinks, setReportLinks] = useState<{ [key: string]: string }>({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   const sprints = [1, 2, 3, 4, 5];
@@ -124,8 +58,30 @@ export default function InstructorPeerReview() {
     setUnsavedChanges(true);
   };
 
+  const updateReportLink = (reviewedTeamId: string, sprint: number, link: string) => {
+    setReportLinks(prev => ({
+      ...prev,
+      [`${reviewedTeamId}-${sprint}`]: link
+    }));
+
+    // Update the peer review with the assigned work description
+    const reviewToUpdate = peerReviews.find(review => 
+      review.reviewedTeamId === reviewedTeamId && review.sprint === sprint
+    );
+
+    if (reviewToUpdate) {
+      setPeerReviews(prev => prev.map(review =>
+        review.id === reviewToUpdate.id
+          ? { ...review, assignedWork: link ? `Review assignment report: ${link}` : undefined }
+          : review
+      ));
+    }
+
+    setUnsavedChanges(true);
+  };
+
   const handleSave = () => {
-    console.log('Saving peer reviews and grades:', { peerReviews, grades });
+    console.log('Saving peer reviews and grades:', { peerReviews, grades, reportLinks });
     setUnsavedChanges(false);
     alert('Peer review data saved successfully!');
   };
@@ -141,6 +97,10 @@ export default function InstructorPeerReview() {
     return reviewingTeam?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       reviewedTeam?.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
+
+  const getReportLink = (reviewedTeamId: string, sprint: number): string => {
+    return reportLinks[`${reviewedTeamId}-${sprint}`] || '';
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -228,7 +188,10 @@ export default function InstructorPeerReview() {
                     Reviewed Team
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Review Document
+                    Reviewing team Assignment Link
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Review Document & Suggested Grades
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Review Grade (R)
@@ -241,6 +204,8 @@ export default function InstructorPeerReview() {
                   const reviewedTeam = teams.find(t => t.id === review.reviewedTeamId);
                   const currentGrade = getTeamReviewGrade(review.reviewingTeamId, selectedSprint);
                   const isEditing = editingGrades[review.id];
+                  const isEditingReportLink = editingReportLinks[review.id];
+                  const currentReportLink = getReportLink(review.reviewedTeamId, selectedSprint);
 
                   return (
                     <tr key={review.id} className="hover:bg-gray-50 transition-colors">
@@ -270,32 +235,115 @@ export default function InstructorPeerReview() {
                         </div>
                       </td>
 
-                      {/* Review Document */}
+                      {/* Assignment Report Link */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
-                          {review.reviewLink ? (
-                            <>
-                              <FileText className="w-4 h-4 text-green-600" />
+                          {isEditingReportLink ? (
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={currentReportLink}
+                                onChange={(e) => updateReportLink(review.reviewedTeamId, selectedSprint, e.target.value)}
+                                placeholder="https://drive.google.com/..."
+                                className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                              />
                               <button
-                                onClick={() => downloadReview(review.reviewLink!)}
-                                className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                                onClick={() => setEditingReportLinks(prev => ({ ...prev, [review.id]: false }))}
+                                className="p-1 text-green-600 hover:bg-green-100 rounded transition-colors"
                               >
-                                <span>View Document</span>
-                                <ExternalLink className="w-3 h-3" />
+                                <Check className="w-4 h-4" />
                               </button>
-                              <div className="text-xs text-gray-500 mt-1">
-                                {review.submittedAt?.toLocaleDateString()}
-                              </div>
-                            </>
+                              <button
+                                onClick={() => {
+                                  setEditingReportLinks(prev => ({ ...prev, [review.id]: false }));
+                                  setReportLinks(prev => ({
+                                    ...prev,
+                                    [`${review.reviewedTeamId}-${selectedSprint}`]: ''
+                                  }));
+                                }}
+                                className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
                           ) : (
                             <>
-
-                              <Clock className="w-4 h-4 text-gray-400" />
-                              <span className="text-sm text-gray-500">Not submitted</span>
+                              {currentReportLink ? (
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => window.open(currentReportLink, '_blank')}
+                                    className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                    <span>View Report</span>
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingReportLinks(prev => ({ ...prev, [review.id]: true }))}
+                                    className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setEditingReportLinks(prev => ({ ...prev, [review.id]: true }))}
+                                  className="flex items-center space-x-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                                >
+                                  <Edit className="w-3 h-3" />
+                                  <span>Add Report Link</span>
+                                </button>
+                              )}
                             </>
                           )}
                         </div>
                       </td>
+
+                      {/* Review Document & Suggested Grades */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="space-y-2">
+                          {/* Review Document */}
+                          <div className="flex items-center space-x-2">
+                            {review.reviewLink ? (
+                              <>
+                                <FileText className="w-4 h-4 text-green-600" />
+                                <button
+                                  onClick={() => downloadReview(review.reviewLink!)}
+                                  className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                                >
+                                  <span>View Review Document</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </button>
+                                <div className="text-xs text-gray-500">
+                                  {review.submittedAt?.toLocaleDateString()}
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm text-gray-500">Not submitted</span>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Suggested Grades */}
+                          {review.suggestedGrades && (
+                            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                              <div className="text-xs font-medium text-blue-900 mb-1">Suggested Grades:</div>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="text-blue-800">
+                                  <strong>Assignment (A):</strong> {review.suggestedGrades.assignment}/100
+                                </div>
+                                {review.suggestedGrades.iteration !== undefined && (
+                                  <div className="text-blue-800">
+                                    <strong>Iteration (I):</strong> {review.suggestedGrades.iteration}/100
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+
                       {/* Review Grade */}
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         {isEditing ? (
@@ -319,15 +367,16 @@ export default function InstructorPeerReview() {
                         ) : (
                           <button
                             onClick={() => setEditingGrades(prev => ({ ...prev, [review.id]: true }))}
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold transition-colors ${currentGrade >= 90 ? 'bg-green-100 text-green-800 hover:bg-green-200' :
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold transition-colors ${
+                              currentGrade >= 90 ? 'bg-green-100 text-green-800 hover:bg-green-200' :
                               currentGrade >= 80 ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
-                                currentGrade >= 70 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
-                                  currentGrade >= 60 ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
-                                    currentGrade >= 0 ? 'bg-red-100 text-red-800 hover:bg-red-200' :
-                                    'bg-gray-100 text-gray-800 hover:bg-red-200'
-                              }`}
+                              currentGrade >= 70 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
+                              currentGrade >= 60 ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
+                              currentGrade > 0 ? 'bg-red-100 text-red-800 hover:bg-red-200' :
+                              'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                            }`}
                           >
-                            {currentGrade || 'Add'}
+                            {currentGrade || 'Add Grade'}
                           </button>
                         )}
                       </td>

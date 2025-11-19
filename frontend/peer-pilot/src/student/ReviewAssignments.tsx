@@ -53,6 +53,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
     };
 
     const handleFileUpload = async (reviewId: string, file: File) => {
+        console.log(file)
         if (!validateGrades(reviewId)) {
             return;
         }
