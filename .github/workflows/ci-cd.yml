@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v4
+
+      # --- LINT FRONTEND ---
       - uses: actions/setup-node@v4
         with:
           cache-dependency-path: frontend/peer-pilot/package-lock.json 
@@ -22,10 +24,31 @@ jobs:
         working-directory: frontend/peer-pilot
         run: npm run lint
 
+      # --- LINT BACKEND ---
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/peer-pilot/requirements.txt
+
+      - name: Install backend deps + linter
+        working-directory: backend/peer-pilot
+        run: |
+          pip install -r requirements.txt
+          pip install ruff
+
+      - name: Run backend linter (ruff)
+        working-directory: backend/peer-pilot
+        run: |
+          ruff check .
+
   test:
     runs-on: ubuntu-latest
     steps:  
       - uses: actions/checkout@v4
+
+      # --- TEST FRONTEND ---
       - uses: actions/setup-node@v4
         with:
           cache-dependency-path: frontend/peer-pilot/package-lock.json
@@ -53,17 +76,72 @@ jobs:
             echo "Current coverage: $COVERAGE_PCT%"
             echo "Required threshold: $COVERAGE_THRESHOLD%"
             if [ $(echo "$COVERAGE_PCT < $COVERAGE_THRESHOLD" | bc -l) -eq 1 ]; then
-              echo "❌ Coverage below threshold"
+              echo "❌ Frontend coverage below threshold"
             else
-              echo "✅ Coverage check passed"
+              echo "✅ Frontend coverage check passed"
             fi  
 
+      # --- TEST BACKEND ---
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/peer-pilot/requirements.txt
+
+      - name: Install backend dependencies
+        working-directory: backend/peer-pilot
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run backend tests with coverage
+        working-directory: backend/peer-pilot
+        run: |
+          pytest
+
+      - name: Upload backend coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-report
+          path: backend/peer-pilot/coverage-backend.xml
+          retention-days: 30
+
+      - name: Check backend coverage threshold
+        working-directory: backend/peer-pilot
+        run: |
+          COVERAGE_THRESHOLD=30
+          COVERAGE_PCT=$(python - << 'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("coverage.xml").getroot()
+          line_rate = float(root.attrib.get("line-rate", 0.0))
+          print(round(line_rate * 100, 2))
+          PY
+          )
+          echo "Current backend coverage: $COVERAGE_PCT%"
+          echo "Required threshold: $COVERAGE_THRESHOLD%"
+          if [ $(echo "$COVERAGE_PCT < $COVERAGE_THRESHOLD" | bc -l) -eq 1 ]; then
+            echo "❌ Backend coverage below threshold"
+            exit 1
+          else
+            echo "✅ Backend coverage check passed"
+          fi  
+
+      # --- ADDING COVERAGE ---
       - name: Add coverage to job summary
         working-directory: frontend/peer-pilot
         run: |
-            COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '"pct":[0-9]*' | grep -o '[0-9]*$' | tail -1 )
+            FRONTEND_COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '"pct":[0-9]*' | grep -o '[0-9]*$' | tail -1 )
+            BACKEND_COVERAGE_PCT=$(python - << 'PY'
+            import xml.etree.ElementTree as ET
+            root = ET.parse("backend/peer-pilot/coverage.xml").getroot()
+            line_rate = float(root.attrib.get("line-rate", 0.0))
+            print(round(line_rate * 100, 2))
+            PY
+            )
             echo "### Test Coverage Results" >> $GITHUB_STEP_SUMMARY
-            echo "✅ All tests passed with $COVERAGE_PCT% coverage!" >> $GITHUB_STEP_SUMMARY
+            echo "✅ All frontend tests passed with $FRONTEND_COVERAGE_PCT% coverage!" >> $GITHUB_STEP_SUMMARY
+            echo "✅ All backend tests passed with $BACKEND_COVERAGE_PCT% coverage!" >> $GITHUB_STEP_SUMMARY
 
       
   update-badge:
@@ -122,6 +200,47 @@ jobs:
           echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Deployed At**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+
+  test-staging:
+    name: Run QASTs on Staging
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/peer-pilot/requirements.txt
+
+      - name: Install backend dependencies for QASTs
+        working-directory: backend/peer-pilot
+        run: |
+          pip install -r requirements.txt
+          pip install pytest requests
+
+      - name: Run QAST001-1 and QAST008-1 against staging
+        working-directory: backend/peer-pilot
+        env:
+          STAGING_BASE_URL: ${{ secrets.STAGING_BASE_URL }}
+        run: |
+          pytest -c pytest-staging.ini \
+            tests_staging/test_qast001_1_dashboard_staging.py \
+            tests_staging/test_qast008_1_grades_staging.py \
+            --maxfail=1 -q
+
+      - name: Add QAST results to job summary
+        if: success()
+        run: |
+          echo "### Staging QAST Results" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ QAST001-1 (Usability / Dashboard): passed on staging" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ QAST008-1 (Data Integrity / Final grades): passed on staging" >> $GITHUB_STEP_SUMMARY
+
 
   deploy-production:
     name: Deploy to Production

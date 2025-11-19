@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from fastapi import FastAPI
 
@@ -7,17 +7,21 @@ from app.core.config import app_settings
 from app.core.db import engine
 from loguru import logger
 
+from app.models.base import Base
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    yield
+Base.metadata.create_all(bind=engine)
 
-    await engine.dispose()
-    logger.info("DB connections closed")
-
-
-web_app = FastAPI(title=app_settings.PROJECT_NAME, lifespan=lifespan)
+web_app = FastAPI(title=app_settings.PROJECT_NAME)
 web_app.include_router(api_router)
+
+
+web_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 if __name__ == "__main__":
