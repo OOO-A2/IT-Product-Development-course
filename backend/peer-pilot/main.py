@@ -5,7 +5,6 @@ from fastapi import FastAPI
 from app.api.base import api_router
 from app.core.config import app_settings
 from app.core.db import engine
-from loguru import logger
 
 from app.models.base import Base
 

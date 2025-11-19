@@ -129,9 +129,8 @@ jobs:
 
       # --- ADDING COVERAGE ---
       - name: Add coverage to job summary
-        working-directory: frontend/peer-pilot
         run: |
-            FRONTEND_COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '"pct":[0-9]*' | grep -o '[0-9]*$' | tail -1 )
+            FRONTEND_COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' frontend/peer-pilot/coverage/coverage-summary.json | grep -o '"pct":[0-9]*' | grep -o '[0-9]*$' | tail -1 )
             BACKEND_COVERAGE_PCT=$(python - << 'PY'
             import xml.etree.ElementTree as ET
             root = ET.parse("backend/peer-pilot/coverage.xml").getroot()

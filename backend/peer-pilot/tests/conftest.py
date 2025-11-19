@@ -11,9 +11,9 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
     
-from main import web_app
-from app.core.db import get_db
-from app.models.base import Base  # Declarative Base for all models
+from main import web_app # noqa: E402
+from app.core.db import get_db # noqa: E402
+from app.models.base import Base # noqa: E402
 
 
 # Use in-memory SQLite for tests

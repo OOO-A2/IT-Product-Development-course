@@ -7,10 +7,10 @@ from app.models.base import Base
 
 
 class AssignmentLetterEnum(str, enum.Enum):
-    A = "A"
-    R = "R"
-    I = "I"
-    C = "C"
+    A = "A" # noqa: E741
+    R = "R" # noqa: E741
+    I = "I" # noqa: E741
+    C = "C" # noqa: E741
 
 
 class Grade(Base):
