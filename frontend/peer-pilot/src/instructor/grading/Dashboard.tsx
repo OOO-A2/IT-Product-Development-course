@@ -300,10 +300,10 @@ export default function InstructorGrading() {
                                     <button
                                       onClick={() => setEditingCell(cellId)}
                                       className={`w-12 px-1 py-1 rounded font-medium transition-colors text-sm ${score >= 90 ? 'bg-green-100 text-green-800 hover:bg-green-200' :
-                                          score >= 80 ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
-                                            score >= 70 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
-                                              score >= 60 ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
-                                                'bg-gray-100 text-gray-500 hover:bg-slate-200'
+                                        score >= 80 ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+                                          score >= 70 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
+                                            score >= 60 ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
+                                              'bg-gray-100 text-gray-500 hover:bg-slate-200'
                                         }`}
                                     >
                                       {score || '-'}
@@ -318,10 +318,10 @@ export default function InstructorGrading() {
                               className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50"
                             >
                               <button disabled className={`inline-flex items-center px-3 py-1 rounded text-sm font-semibold ${sprintSum >= 360 ? 'bg-green-100 text-green-800' :
-                                  sprintSum >= 320 ? 'bg-blue-100 text-blue-800' :
-                                    sprintSum >= 280 ? 'bg-yellow-100 text-yellow-800' :
-                                      sprintSum >= 240 ? 'bg-orange-100 text-orange-800' :
-                                        'bg-gray-100 text-gray-800'
+                                sprintSum >= 320 ? 'bg-blue-100 text-blue-800' :
+                                  sprintSum >= 280 ? 'bg-yellow-100 text-yellow-800' :
+                                    sprintSum >= 240 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-gray-100 text-gray-800'
                                 }`}>
                                 {sprintSum || '-'}
                               </button>
@@ -332,10 +332,10 @@ export default function InstructorGrading() {
                         {/* Team Overall Average */}
                         <td className="px-6 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${overallAverage >= 1080 ? 'bg-green-100 text-green-800' :
-                              overallAverage >= 960 ? 'bg-blue-100 text-blue-800' :
-                                overallAverage >= 840 ? 'bg-yellow-100 text-yellow-800' :
-                                  overallAverage >= 720 ? 'bg-orange-100 text-orange-800' :
-                                    'bg-gray-100 text-gray-800 border border-gray-300'
+                            overallAverage >= 960 ? 'bg-blue-100 text-blue-800' :
+                              overallAverage >= 840 ? 'bg-yellow-100 text-yellow-800' :
+                                overallAverage >= 720 ? 'bg-orange-100 text-orange-800' :
+                                  'bg-gray-100 text-gray-800 border border-gray-300'
                             }`}>
                             {overallAverage || '-'}
                           </span>
@@ -396,10 +396,10 @@ export default function InstructorGrading() {
                                     <button
                                       onClick={() => setEditingCell(cellId)}
                                       className={`w-12 px-1 py-1 rounded font-medium transition-colors text-sm ${score >= 90 ? 'bg-green-100 text-green-800 hover:bg-green-200' :
-                                          score >= 80 ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
-                                            score >= 70 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
-                                              score >= 60 ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
-                                                'bg-gray-100 text-gray-500 hover:bg-slate-200'
+                                        score >= 80 ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+                                          score >= 70 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
+                                            score >= 60 ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
+                                              'bg-gray-100 text-gray-500 hover:bg-slate-200'
                                         }`}
                                     >
                                       {score || '-'}
@@ -414,10 +414,10 @@ export default function InstructorGrading() {
                               className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50"
                             >
                               <button disabled className={`inline-flex items-center px-3 py-1 rounded text-sm font-semibold ${sprintSum >= 360 ? 'bg-green-100 text-green-800' :
-                                  sprintSum >= 320 ? 'bg-blue-100 text-blue-800' :
-                                    sprintSum >= 280 ? 'bg-yellow-100 text-yellow-800' :
-                                      sprintSum >= 240 ? 'bg-orange-100 text-orange-800' :
-                                        'bg-gray-100 text-gray-800'
+                                sprintSum >= 320 ? 'bg-blue-100 text-blue-800' :
+                                  sprintSum >= 280 ? 'bg-yellow-100 text-yellow-800' :
+                                    sprintSum >= 240 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-gray-100 text-gray-800'
                                 }`}>
                                 {sprintSum || '-'}
                               </button>
@@ -428,10 +428,10 @@ export default function InstructorGrading() {
                         {/* Student Overall Average */}
                         <td className="px-6 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${overallAverage >= 1080 ? 'bg-green-100 text-green-800' :
-                              overallAverage >= 960 ? 'bg-blue-100 text-blue-800' :
-                                overallAverage >= 840 ? 'bg-yellow-100 text-yellow-800' :
-                                  overallAverage >= 720 ? 'bg-orange-100 text-orange-800' :
-                                    'bg-gray-100 text-gray-800 border border-gray-300'
+                            overallAverage >= 960 ? 'bg-blue-100 text-blue-800' :
+                              overallAverage >= 840 ? 'bg-yellow-100 text-yellow-800' :
+                                overallAverage >= 720 ? 'bg-orange-100 text-orange-800' :
+                                  'bg-gray-100 text-gray-800 border border-gray-300'
                             }`}>
                             {overallAverage || '-'}
                           </span>

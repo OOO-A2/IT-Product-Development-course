@@ -19,14 +19,20 @@ export interface Team {
 }
 
 export interface PeerReview {
-  id: string
-  sprint: number
-  reviewingTeamId: string
-  reviewedTeamId: string
-  reviewLink: string | null
-  status: 'submitted' | 'pending' | 'graded'
-  submittedAt: Date | null
-  dueDate: Date | null
+  id: string;
+  sprint: number;
+  reviewingTeamId: string;
+  reviewedTeamId: string;
+  reviewLink: string;
+  status: 'pending' | 'submitted' | 'graded';
+  submittedAt: Date | null;
+  dueDate?: Date;
+  assignedWork?: string;
+  suggestedGrades?: {
+    assignment: number;
+    iteration?: number;
+  };
+  reviewGrade?: number;
 }
 
 export interface StudentDashboardProps {
@@ -39,19 +45,19 @@ export interface StudentDashboardProps {
 
 export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'E'
 
-export type Assignments = Array<AssignmentLetter> 
+export type Assignments = Array<AssignmentLetter>
 
 export const assignments: Assignments = ['A', 'R', 'I', 'C', 'E'];
 
 export const assignmentNames = {
-    A: 'Assignment',
-    R: 'Peer review',
-    I: 'Implementation',
-    C: 'Communication',
-    E: 'Extra',
-  };
+  A: 'Assignment',
+  R: 'Peer review',
+  I: 'Implementation',
+  C: 'Communication',
+  E: 'Extra',
+};
 
-  export interface TeamGrade {
+export interface TeamGrade {
   teamId: string;
   sprint: number;
   assignment: AssignmentLetter;

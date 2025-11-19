@@ -3,15 +3,9 @@ import { Users, Award, FileCheck, Menu, X } from 'lucide-react';
 import TeamMembers from './TeamMembers.tsx';
 import MyGrades from './MyGrades';
 import ReviewAssignments from './ReviewAssignments';
-import type { StudentDashboardProps } from '../types/types.tsx';
+import type { PeerReview, StudentDashboardProps } from '../types/types.tsx';
 
-export default function StudentDashboard({ 
-  student, 
-  teams, 
-  students, 
-  grades, 
-  reviewAssignments 
-}: StudentDashboardProps) {
+export default function StudentDashboard({ student, teams, students, grades, reviewAssignments }: StudentDashboardProps) {
   const [activeTab, setActiveTab] = useState<'team' | 'grades' | 'reviews'>('grades');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -23,6 +17,18 @@ export default function StudentDashboard({
     { id: 'reviews' as const, name: 'Review Assignments', icon: FileCheck },
     { id: 'team' as const, name: 'Team Members', icon: Users },
   ];
+
+  const handleDeleteReview = (reviewId: string) => {
+    const reviewToDelete = reviewAssignments.find(r => r.id === reviewId);
+
+    // Log the deletion for audit purposes
+    if (reviewToDelete) {
+      console.log(`Review deleted: Team ${reviewToDelete.reviewingTeamId} for Team ${reviewToDelete.reviewedTeamId}, 
+        Sprint ${reviewToDelete.sprint}`);
+    }
+  };
+
+  const onUpdateReview = (rId: string, u: Partial<PeerReview>) => console.log(rId + " " + u)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -59,11 +65,10 @@ export default function StudentDashboard({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`flex items-center space-x-2 pb-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{tab.name}</span>
@@ -87,11 +92,10 @@ export default function StudentDashboard({
                     setActiveTab(tab.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg text-left font-medium ${
-                    activeTab === tab.id
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg text-left font-medium ${activeTab === tab.id
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{tab.name}</span>
@@ -105,24 +109,26 @@ export default function StudentDashboard({
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === 'team' && (
-          <TeamMembers 
-            team={studentTeam!} 
-            students={teamStudents} 
+          <TeamMembers
+            team={studentTeam!}
+            students={teamStudents}
           />
         )}
 
         {activeTab === 'grades' && (
-          <MyGrades 
+          <MyGrades
             student={student}
             grades={grades}
           />
         )}
 
         {activeTab === 'reviews' && (
-          <ReviewAssignments 
+          <ReviewAssignments
             student={student}
             team={studentTeam!}
             reviewAssignments={reviewAssignments}
+            onDeleteReview={handleDeleteReview}
+            onUpdateReview={onUpdateReview}
           />
         )}
       </div>

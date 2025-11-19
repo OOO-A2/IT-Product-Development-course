@@ -44,22 +44,38 @@ export const mockGrades: Array<Grade> = [
     // Add more grades...
 ]
 
-const reviewAssignments: Array<PeerReview> = [
+export const reviewAssignments: Array<PeerReview> = [
     {
         id: 'pr1',
         sprint: 1,
         reviewingTeamId: 't1',
         reviewedTeamId: 't2',
         reviewLink: 'https://drive.google.com/file/d/abc123/view',
-        status: 'submitted',
+        status: 'graded',
         submittedAt: new Date('2024-01-15'),
-        dueDate: null,
+        suggestedGrades: {
+            assignment: 1,
+            iteration: 3
+        }
     },
     {
         id: 'pr2',
         sprint: 2,
         reviewingTeamId: 't1',
         reviewedTeamId: 't3',
+        reviewLink: 'https://drive.google.com/file/d/abc123/view',
+        status: 'submitted',
+        submittedAt: new Date('2024-01-15'),
+        suggestedGrades: {
+            assignment: 13,
+            iteration: 33
+        }
+    },
+    {
+        id: 'pr3',
+        sprint: 3,
+        reviewingTeamId: 't1',
+        reviewedTeamId: 't5',
         reviewLink: '',
         status: 'pending',
         submittedAt: null,

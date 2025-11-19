@@ -1,21 +1,23 @@
+import { mockGrades, mockStudent, mockStudents, mockTeams, reviewAssignments } from "./data/mock";
 import Dashboard from "./instructor/grading/Dashboard";
+import StudentDashboard from "./student/StudentDashboard";
 
 function App() {
   return (
     <div className="App">
-      {/* <StudentDashboard student={student}
-      teams={teams}
-      students={students}
-      grades={grades}
-      reviewAssignments={reviewAssignments}/> */}
-    {/* <InstructorTeamGrading
+      <StudentDashboard student={mockStudent}
+        teams={mockTeams}
+        students={mockStudents}
+        grades={mockGrades}
+        reviewAssignments={reviewAssignments} />
+      {/* <InstructorTeamGrading
       teams={teams}
       students={students}
       initialGrades={initialGrades}
     /> */}
-    {/* <LoginPage/> */}
-    <Dashboard/>
-    {/* <AllReviews/> */}
+      {/* <LoginPage/> */}
+      {/* <Dashboard/> */}
+      {/* <AllReviews/> */}
     </div>
   );
 }
