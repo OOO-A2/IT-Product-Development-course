@@ -16,7 +16,7 @@ export const mockTeams = [
 export const mockStudents: Array<Student> = [
     { id: 's1', name: 'Alice Johnson', email: 'alice@example.com', teamId: 't1' },
     { id: 's2', name: 'Bob Smith', email: 'bob@example.com', teamId: 't1' },
-    { id: 's3', name: 'Carol Williams', email: 'carol@example.com', teamId: 't1' },
+    { id: 's3', name: 'Carol Williams', email: 'carol@example.com', teamId: 't2' },
     { id: 's4', name: 'David Brown', email: 'david@example.com', teamId: 't2' },
     { id: 's5', name: 'Emma Davis', email: 'emma@example.com', teamId: 't2' },
     { id: 's6', name: 'Frank Miller', email: 'frank@example.com', teamId: 't2' },
@@ -31,6 +31,11 @@ export const mockGrades: Array<Grade> = [
     { studentId: 's1', sprint: 1, assignment: 'I', score: 88 },
     { studentId: 's1', sprint: 1, assignment: 'C', score: 92 },
     { studentId: 's1', sprint: 1, assignment: 'E', score: 1 },
+    { studentId: 's2', sprint: 1, assignment: 'A', score: 85 },
+    { studentId: 's2', sprint: 1, assignment: 'R', score: 90 },
+    { studentId: 's2', sprint: 1, assignment: 'I', score: 88 },
+    { studentId: 's2', sprint: 1, assignment: 'C', score: 92 },
+    { studentId: 's2', sprint: 1, assignment: 'E', score: 5 },
     // Sprint 2
     { studentId: 's1', sprint: 2, assignment: 'A', score: 88 },
     { studentId: 's1', sprint: 2, assignment: 'R', score: 0 }, // Not submitted yet
