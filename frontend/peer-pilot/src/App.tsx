@@ -1,7 +1,7 @@
-import { mockGrades, mockStudent, mockStudents, mockTeams, reviewAssignments } from "./data/mock";
+// import { mockGrades, mockStudent, mockStudents, mockTeams, reviewAssignments } from "./data/mock";
 import AllReviews from "./instructor/reviews/AllReviews";
 // import Dashboard from "./instructor/grading/Dashboard";
-import StudentDashboard from "./student/StudentDashboard";
+// import StudentDashboard from "./student/StudentDashboard";
 
 function App() {
   return (
