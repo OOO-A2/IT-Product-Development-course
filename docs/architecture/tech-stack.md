@@ -154,4 +154,87 @@ Modules were selected based on:
 
 ---
 
+## Static analysis
+
+### Overview
+To ensure consistent code quality, early bug detection, and maintainable documentation, the project uses several static analysis tools.  
+Each formal language in the codebase (Python, Markdown) requires a dedicated tool for formatting and validation.  
+For Python specifically, additional type checking is required to detect issues before runtime.
+
+---
+
+### Selected tools and justification
+
+### **1. Ruff (Python linter + formatter)**
+**Purpose:** Formatting, linting, import sorting  
+**Why chosen:**
+- Extremely fast (written in Rust)
+- Replaces multiple tools: Black, Flake8, isort
+- Provides a consistent formatting standard for the entire Python codebase
+- Integrates seamlessly with CI and pre-commit
+- Good autofix support reduces developer overhead
+
+**Covers requirements:**  
+- Code formatting checker  
+- Linter for Python  
+- Ensures stylistic & structural consistency  
+
+---
+
+### **2. Mypy (Python static type checker)**
+**Purpose:** Static type checking for Python  
+**Why chosen:**
+- Mature ecosystem and widely adopted in industry
+- Best-in-class type inference for dynamically typed code
+- Great compatibility with FastAPI / Pydantic (used in the project)
+- Detects type-related bugs before execution
+- Helps enforce stable APIs between service layers
+
+**Covers requirements:**  
+- Mandatory for dynamic languages to detect errors early  
+- Ensures type safety in business logic and API layers  
+
+---
+
+### **3. mdbook-linkcheck (Markdown link checker)**
+**Purpose:** Validates internal & external links inside Markdown documentation  
+**Why chosen:**
+- Integrated with mdBook ecosystem
+- Detects broken internal references (e.g., renamed pages)
+- Prevents deployment of invalid docs
+- CI-friendly output
+
+**Covers requirements:**  
+✔ Required link checker for docs  
+✔ Prevents broken navigation in published documentation  
+
+---
+
+### **4. markdownlint (Markdown formatting checker)**
+**Purpose:** Enforces consistent Markdown formatting  
+**Why chosen:**
+- Ensures readability across the entire documentation set
+- Prevents inconsistent headings, indentations, and list styles
+- Integrates easily with editors and CI
+
+**Covers requirements:**  
+- Formatter/linter for Markdown files  
+- Ensures consistent documentation style  
+
+---
+
+### Summary of Tools
+
+| Tool                | Language | Purpose                             |
+|---------------------|----------|-------------------------------------|
+| **Ruff**            | Python   | Formatter + linter                  |
+| **Mypy**            | Python   | Type checker                        |
+| **markdownlint**    | Markdown | Formatting consistency              |
+| **mdbook-linkcheck**| Markdown | Detect broken links in documentation|
+
+These tools collectively ensure:
+- Correct formatting
+- Early detection of type errors
+- High documentation quality
+- CI-enforced consistency across the entire repository
 
