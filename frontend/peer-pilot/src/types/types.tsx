@@ -8,7 +8,7 @@ export interface Student {
 export interface Grade {
   studentId: string
   sprint: number
-  assignment: 'A' | 'R' | 'I' | 'C'
+  assignment: AssignmentLetter
   score: number
 }
 
@@ -19,14 +19,20 @@ export interface Team {
 }
 
 export interface PeerReview {
-  id: string
-  sprint: number
-  reviewingTeamId: string
-  reviewedTeamId: string
-  reviewLink: string | null
-  status: 'submitted' | 'pending' | 'graded'
-  submittedAt: Date | null
-  dueDate: Date | null
+  id: string;
+  sprint: number;
+  reviewingTeamId: string;
+  reviewedTeamId: string;
+  reviewLink: string;
+  status: 'pending' | 'submitted' | 'graded';
+  submittedAt: Date | null;
+  dueDate?: Date;
+  assignedWork?: string;
+  suggestedGrades?: {
+    assignment: number;
+    iteration?: number;
+  };
+  reviewGrade?: number;
 }
 
 export interface StudentDashboardProps {
@@ -37,23 +43,25 @@ export interface StudentDashboardProps {
   reviewAssignments: PeerReview[];
 }
 
-export type AssignmentLetter = 'A' | 'R' | 'I' | 'C'
+export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'ET' | 'E'
 
-export type Assignments = Array<AssignmentLetter> 
+export type Assignments = Array<AssignmentLetter>
 
-export const assignments: Assignments = ['A', 'R', 'I', 'C'];
+export const assignments: Assignments = ['A', 'R', 'I', 'C', 'ET', 'E'];
 
 export const assignmentNames = {
-    A: 'Assignment',
-    R: 'Peer review',
-    I: 'Implementation',
-    C: 'Coordination'
-  };
+  A: 'Assignment',
+  R: 'Peer review',
+  I: 'Implementation',
+  C: 'Communication',
+  ET: 'Team extra', // For team grades
+  E: 'Extra',
+};
 
-  export interface TeamGrade {
+export interface TeamGrade {
   teamId: string;
   sprint: number;
-  assignment: 'A' | 'R' | 'I' | 'C';
+  assignment: AssignmentLetter;
   score: number;
   comments?: string;
 }
