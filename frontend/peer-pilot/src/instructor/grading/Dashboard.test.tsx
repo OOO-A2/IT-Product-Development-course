@@ -5,6 +5,6 @@
     describe('Renders extra column on the teams view of instructors dashboard', () => {
       it('renders the correct text', () => {
         render(<Dashboard />);
-        expect(screen.getByText('Extra')).toBeInTheDocument();
+        expect(screen.getAllByText('Extra')[0]).toBeInTheDocument();
       })
     });
