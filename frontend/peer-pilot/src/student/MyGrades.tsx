@@ -1,5 +1,5 @@
 import { Calendar, TrendingUp } from 'lucide-react';
-import type { Student, Grade } from '../types/types.tsx';
+import { type Student, type Grade, assignments, type AssignmentLetter, assignmentNames } from '../types/types.tsx';
 
 interface MyGradesProps {
   student: Student;
@@ -8,16 +8,8 @@ interface MyGradesProps {
 
 export default function MyGrades({ student, grades }: MyGradesProps) {
   const sprints = [1, 2, 3, 4, 5];
-  const assignments: Array<'A' | 'R' | 'I' | 'C'> = ['A', 'R', 'I', 'C'];
 
-  const assignmentNames = {
-    A: 'Assignment',
-    R: 'Peer Review',
-    I: 'Implementation',
-    C: 'Coordination'
-  };
-
-  const getGrade = (sprint: number, assignment: 'A' | 'R' | 'I' | 'C'): number => {
+  const getGrade = (sprint: number, assignment: AssignmentLetter): number => {
     const grade = grades.find(
       g => g.studentId === student.id && g.sprint === sprint && g.assignment === assignment
     );
@@ -106,6 +98,7 @@ export default function MyGrades({ student, grades }: MyGradesProps) {
                       return (
                         <td key={assignment} className="px-6 py-4 whitespace-nowrap text-center">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                            assignment === 'E' && score > 0 ? 'bg-green-100 text-green-800 border border-green-300' :
                             score >= 90 ? 'bg-green-100 text-green-800' :
                             score >= 80 ? 'bg-blue-100 text-blue-800' :
                             score >= 70 ? 'bg-yellow-100 text-yellow-800' :
