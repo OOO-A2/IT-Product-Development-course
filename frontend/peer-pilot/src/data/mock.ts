@@ -30,11 +30,13 @@ export const mockGrades: Array<Grade> = [
     { studentId: 's1', sprint: 1, assignment: 'R', score: 90 },
     { studentId: 's1', sprint: 1, assignment: 'I', score: 88 },
     { studentId: 's1', sprint: 1, assignment: 'C', score: 92 },
+    { studentId: 's1', sprint: 1, assignment: 'ET', score: 50 },
     { studentId: 's1', sprint: 1, assignment: 'E', score: 1 },
     { studentId: 's2', sprint: 1, assignment: 'A', score: 85 },
     { studentId: 's2', sprint: 1, assignment: 'R', score: 90 },
     { studentId: 's2', sprint: 1, assignment: 'I', score: 88 },
     { studentId: 's2', sprint: 1, assignment: 'C', score: 92 },
+    { studentId: 's2', sprint: 1, assignment: 'ET', score: 50 },
     { studentId: 's2', sprint: 1, assignment: 'E', score: 5 },
     // Sprint 2
     { studentId: 's1', sprint: 2, assignment: 'A', score: 88 },

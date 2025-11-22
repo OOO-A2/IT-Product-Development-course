@@ -43,17 +43,18 @@ export interface StudentDashboardProps {
   reviewAssignments: PeerReview[];
 }
 
-export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'E'
+export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'ET' | 'E'
 
 export type Assignments = Array<AssignmentLetter>
 
-export const assignments: Assignments = ['A', 'R', 'I', 'C', 'E'];
+export const assignments: Assignments = ['A', 'R', 'I', 'C', 'ET', 'E'];
 
 export const assignmentNames = {
   A: 'Assignment',
   R: 'Peer review',
   I: 'Implementation',
   C: 'Communication',
+  ET: 'Team extra', // For team grades
   E: 'Extra',
 };
 

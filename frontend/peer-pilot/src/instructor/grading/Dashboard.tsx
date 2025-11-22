@@ -224,9 +224,9 @@ export default function InstructorGrading() {
                         className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-200 first:border-l-0"
                       >
                         <div className="flex flex-col items-center">
-                          <span>{assignment}</span>
+                          <span>{assignment === 'ET' ? 'E' : assignment}</span>
                           <span className="text-xs font-normal text-gray-400 normal-case">
-                            {assignmentNames[assignment]}
+                            {assignment === 'ET' && isTeamView ? 'Extra' : assignmentNames[assignment]}
                           </span>
                         </div>
                       </th>
