@@ -1,8 +1,13 @@
-version: "3.8"
+version: "3.9"
 
 services:
-  web-app:
+  backend:
     build: .
+    container_name: peerpilot-backend
     restart: always
+    environment:
+      SQLALCHEMY_DATABASE_URI: ${DATABASE_URL}
     volumes:
-      - ./logs:/app/logs
+      - ./data:/app/data
+    ports:
+      - "8000:8000"
