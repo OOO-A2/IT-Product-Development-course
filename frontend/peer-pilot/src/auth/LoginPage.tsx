@@ -34,6 +34,7 @@ export default function LoginPage({ onLogin }: LoginProps) {
       }
     } catch (err) {
       setError('Login failed. Please try again.');
+      console.log(`Error: ${err}`)
     } finally {
       setIsLoading(false);
     }
