@@ -1,4 +1,21 @@
-import type { Grade, PeerReview, Student } from "../types/types";
+import type { Grade, PeerReview, Student, User, UserRole } from "../types/types";
+
+export const mockUsers: User[] = [
+    {
+      id: '1',
+      name: 'Professor Denis',
+      email: 'denis@innopolis.ru',
+      role: 'instructor' as UserRole,
+      teamId: ''
+    },
+    {
+      id: '2',
+      name: 'Arsen',
+      email: 'arsen@innopolis.university',
+      role: 'student' as UserRole,
+      teamId: 't1'
+    }
+  ];
 
 export const mockStudent: Student = {
     id: 's1',

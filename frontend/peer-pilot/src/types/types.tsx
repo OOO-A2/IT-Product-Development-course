@@ -65,3 +65,13 @@ export interface TeamGrade {
   score: number;
   comments?: string;
 }
+
+export type UserRole = 'instructor' | 'student';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  teamId: string;
+}
