@@ -15,7 +15,6 @@ sys.path.insert(
 
 from app.core.config import app_settings
 from app.core.db import Base
-import app.schemas
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
