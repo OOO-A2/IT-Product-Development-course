@@ -4,6 +4,7 @@ import { assignmentNames, assignments, type AssignmentLetter, type Grade, type S
 import TeamFilter from './TeamFilter';
 import { mockGrades, mockStudents, mockTeams } from '../../data/mock';
 import { Link, useSearchParams } from 'react-router-dom';
+import { getGradeColor100, getGradeColor500 } from '../../utils/utils';
 
 export default function InstructorGrading() {
   // Mock data
@@ -169,7 +170,7 @@ export default function InstructorGrading() {
     alert('Grades saved successfully!');
   };
 
-  
+
   const handleExport = () => {
     console.log('Exporting grades...');
     alert('Export functionality would download CSV/Excel file');
@@ -201,7 +202,7 @@ export default function InstructorGrading() {
     const saved = localStorage.getItem('tableScroll');
     if (saved && tableContainerRef.current) {
       const { scrollLeft, scrollTop } = JSON.parse(saved);
-      
+
       // Use setTimeout to ensure DOM is ready
       setTimeout(() => {
         if (tableContainerRef.current) {
@@ -218,7 +219,7 @@ export default function InstructorGrading() {
     if (!tableContainer) return;
 
     let scrollTimeout: number;
-    
+
     const handleScroll = () => {
       // Throttle scroll events
       clearTimeout(scrollTimeout);
@@ -462,12 +463,7 @@ export default function InstructorGrading() {
                                   ) : (
                                     <button
                                       onClick={() => setEditingCell(cellId)}
-                                      className={`w-12 px-1 py-1 rounded font-medium transition-colors text-sm ${score >= 90 ? 'bg-green-100 text-green-800 hover:bg-green-200' :
-                                        score >= 80 ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
-                                          score >= 70 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
-                                            score >= 60 ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
-                                              'bg-gray-100 text-gray-500 hover:bg-slate-200'
-                                        }`}
+                                      className={`w-12 px-1 py-1 rounded font-medium transition-colors text-sm ${getGradeColor100(score)}`}
                                     >
                                       {score || '-'}
                                     </button>
@@ -480,12 +476,7 @@ export default function InstructorGrading() {
                               key={`${sprint}-sum`}
                               className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50"
                             >
-                              <button disabled className={`inline-flex items-center px-3 py-1 rounded text-sm font-semibold ${sprintSum >= 360 ? 'bg-green-100 text-green-800' :
-                                sprintSum >= 320 ? 'bg-blue-100 text-blue-800' :
-                                  sprintSum >= 280 ? 'bg-yellow-100 text-yellow-800' :
-                                    sprintSum >= 240 ? 'bg-orange-100 text-orange-800' :
-                                      'bg-gray-100 text-gray-800'
-                                }`}>
+                              <button disabled className={`inline-flex items-center px-3 py-1 rounded text-sm font-semibold ${getGradeColor500(sprintSum)}`}>
                                 {sprintSum || '-'}
                               </button>
                             </td>
@@ -542,12 +533,7 @@ export default function InstructorGrading() {
                                 // Only show team total in first student's row, span other rows
                                 <button
                                   disabled
-                                  className={`w-16 px-2 py-1 rounded font-medium transition-all duration-200 transform hover:scale-105 text-sm ${teamTotal >= 400 ? 'bg-green-100 text-green-800' :
-                                    teamTotal >= 350 ? 'bg-blue-100 text-blue-800' :
-                                      teamTotal >= 300 ? 'bg-yellow-100 text-yellow-800' :
-                                        teamTotal >= 250 ? 'bg-orange-100 text-orange-800' :
-                                          'bg-gray-100 text-gray-500'
-                                    }`}
+                                  className={`w-16 px-2 py-1 rounded font-medium transition-all duration-200 transform hover:scale-105 text-sm ${getGradeColor500(teamTotal)}`}
                                   title="Team Total (A+R+I+C+ET) - Same for all team members"
                                 >
                                   {teamTotal || '-'}
@@ -582,12 +568,7 @@ export default function InstructorGrading() {
                                 ) : (
                                   <button
                                     onClick={() => setEditingCell(cellId)}
-                                    className={`w-12 px-1 py-1 rounded font-medium transition-all duration-200 transform hover:scale-110 text-sm ${individualExtra >= 90 ? 'bg-green-100 text-green-800 hover:bg-green-200' :
-                                      individualExtra >= 80 ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
-                                        individualExtra >= 70 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
-                                          individualExtra >= 60 ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
-                                            'bg-gray-100 text-gray-500 hover:bg-slate-200'
-                                      }`}
+                                    className={`w-12 px-1 py-1 rounded font-medium transition-all duration-200 transform hover:scale-110 text-sm ${getGradeColor100(individualExtra)}`}
                                   >
                                     {individualExtra || '-'}
                                   </button>
