@@ -1,5 +1,6 @@
 import { Calendar, TrendingUp } from 'lucide-react';
 import { type Student, type Grade, assignments, type AssignmentLetter, assignmentNames } from '../types/types.tsx';
+import { getGradeColor100, getGradeColor500 } from '../utils/utils.ts';
 
 interface MyGradesProps {
   student: Student;
@@ -16,21 +17,17 @@ export default function MyGrades({ student, grades }: MyGradesProps) {
     return grade?.score ?? 0;
   };
 
-  const calculateSprintAverage = (sprint: number): number => {
+  const calculateSprintSum = (sprint: number): number => {
     const scores = assignments.map(a => getGrade(sprint, a));
-    const sum = scores.reduce((acc, score) => acc + score, 0);
-    return scores.length > 0 ? Math.round(sum / scores.length) : 0;
+    return scores.reduce((acc, score) => acc + score, 0);
   };
 
-  const calculateOverallAverage = (): number => {
-    const sprintAverages = sprints.map(sprint => calculateSprintAverage(sprint));
-    const validAverages = sprintAverages.filter(avg => avg > 0);
-    return validAverages.length > 0 
-      ? Math.round(validAverages.reduce((acc, avg) => acc + avg, 0) / validAverages.length)
-      : 0;
+  const calculateOverallSum = (): number => {
+    const sprintSums = sprints.map(sprint => calculateSprintSum(sprint));
+    return sprintSums.filter(avg => avg > 0).reduce((acc, avg) => acc + avg, 0)
   };
 
-  const overallAverage = calculateOverallAverage();
+  const overallSum = calculateOverallSum();
 
   return (
     <div className="space-y-6">
@@ -39,11 +36,11 @@ export default function MyGrades({ student, grades }: MyGradesProps) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">Overall Performance</h2>
-            <p className="text-blue-100 text-sm">Average across all sprints</p>
+            <p className="text-blue-100 text-sm">Sum across all sprints</p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold">{overallAverage}</div>
-            <div className="text-blue-100 text-sm">/ 100</div>
+            <div className="text-3xl font-bold">{overallSum}</div>
+            <div className="text-blue-100 text-sm">/ {500*sprints.length}</div>
           </div>
         </div>
         <div className="mt-4 flex items-center space-x-2 text-blue-100">
@@ -75,13 +72,13 @@ export default function MyGrades({ student, grades }: MyGradesProps) {
                   </th>
                 ))}
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Average
+                  Sum
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {sprints.map(sprint => {
-                const sprintAverage = calculateSprintAverage(sprint);
+                const sprintSum = calculateSprintSum(sprint);
                 
                 return (
                   <tr key={sprint} className="hover:bg-gray-50 transition-colors">
@@ -97,15 +94,7 @@ export default function MyGrades({ student, grades }: MyGradesProps) {
                       
                       return (
                         <td key={assignment} className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                            assignment === 'E' && score > 0 ? 'bg-green-100 text-green-800 border border-green-300' :
-                            score >= 90 ? 'bg-green-100 text-green-800' :
-                            score >= 80 ? 'bg-blue-100 text-blue-800' :
-                            score >= 70 ? 'bg-yellow-100 text-yellow-800' :
-                            score >= 60 ? 'bg-orange-100 text-orange-800' :
-                            score > 0 ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getGradeColor100(score)}`}>
                             {score || '-'}
                           </span>
                         </td>
@@ -113,15 +102,8 @@ export default function MyGrades({ student, grades }: MyGradesProps) {
                     })}
                     
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${
-                        sprintAverage >= 90 ? 'bg-green-100 text-green-800 border border-green-300' :
-                        sprintAverage >= 80 ? 'bg-blue-100 text-blue-800 border border-blue-300' :
-                        sprintAverage >= 70 ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
-                        sprintAverage >= 60 ? 'bg-orange-100 text-orange-800 border border-orange-300' :
-                        sprintAverage > 0 ? 'bg-red-100 text-red-800 border border-red-300' :
-                        'bg-gray-100 text-gray-800 border border-gray-300'
-                      }`}>
-                        {sprintAverage || '-'}
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${getGradeColor500(sprintSum)}`}>
+                        {sprintSum || '-'}
                       </span>
                     </td>
                   </tr>
