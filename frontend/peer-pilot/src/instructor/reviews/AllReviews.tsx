@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Search, Save, Calendar, ExternalLink, FileText, Clock, Edit, Check, X, Download } from 'lucide-react';
-import { type Grade, type Student, type Team, type PeerReview, assignments, assignmentNames } from '../../types/types';
+import { type Grade, type Student, type Team, type PeerReview, assignments, assignmentNames, type AssignmentLetter } from '../../types/types';
 import { mockGrades, mockReviews, mockStudents, mockTeams } from '../../data/mock';
 import { useSearchParams } from 'react-router-dom';
 import { getGradeColor100 } from '../../utils/utils';
@@ -30,7 +30,7 @@ export default function InstructorPeerReview() {
       searchParams.set('sprint', String(selectedSprint));
     }
     setSearchParams(searchParams);
-  }, [selectedSprint, searchParams]);
+  }, [selectedSprint, searchParams, setSearchParams]);
 
   const sprints = [1, 2, 3, 4, 5];
 
@@ -50,7 +50,7 @@ export default function InstructorPeerReview() {
   };
 
   // Update team assignment grade
-  const updateTeamAssignmentGrade = (teamId: string, sprint: number, assignment: string, score: number) => {
+  const updateTeamAssignmentGrade = (teamId: string, sprint: number, assignment: AssignmentLetter, score: number) => {
     const validScore = Math.max(0, Math.min(100, score));
     const teamStudents = students.filter(student => student.teamId === teamId);
 

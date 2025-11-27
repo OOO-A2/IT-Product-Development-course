@@ -42,7 +42,7 @@ export default function InstructorGrading() {
     }
 
     setSearchParams(newParams, { replace: true });
-  }, [selectedTeam, teams]);
+  }, [selectedTeam, teams, setSearchParams, searchParams]);
 
   const sprints = [1, 2, 3, 4];
 
