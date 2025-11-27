@@ -1,10 +1,11 @@
 import { Users } from "lucide-react"
 import type { Team } from "../../types/types"
+import type React from "react"
 
 type TeamFilterProps = {
   teams: Team[]
-  selectedTeam: any
-  setSelectedTeam: any
+  selectedTeam: string
+  setSelectedTeam: React.Dispatch<React.SetStateAction<string>>
 }
 
 export default function TeamFilter({ teams, selectedTeam, setSelectedTeam }: TeamFilterProps) {

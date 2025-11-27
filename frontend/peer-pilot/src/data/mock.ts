@@ -139,3 +139,5 @@ export const mockReviews: Array<PeerReview> = [
         }
     },
   ]
+
+  export const mockSprints = [1, 2, 3, 4]

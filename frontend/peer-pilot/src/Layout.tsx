@@ -18,6 +18,7 @@ export default function Layout({ children, user, onLogout, role }: LayoutProps) 
 
   const instructorNavItems = [
     { path: '/instructor', label: 'Dashboard', icon: Home },
+    { path: '/instructor/students', label: 'All Students', icon: Users },
     { path: '/instructor/reviews', label: 'Reviews', icon: Users },
   ];
 

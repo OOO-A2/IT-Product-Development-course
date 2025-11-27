@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, Save, Calendar, ExternalLink, FileText, Clock, Edit, Check, X } from 'lucide-react';
 import type { Grade, Student, Team, PeerReview } from '../../types/types';
 import { mockGrades, mockReviews, mockStudents, mockTeams } from '../../data/mock';
+import { useSearchParams } from 'react-router-dom';
 
 export default function InstructorPeerReview() {
   // Mock data
@@ -10,12 +11,25 @@ export default function InstructorPeerReview() {
   const [grades, setGrades] = useState<Grade[]>(mockGrades);
   const [students] = useState<Student[]>(mockStudents);
 
-  const [selectedSprint, setSelectedSprint] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingGrades, setEditingGrades] = useState<{ [key: string]: boolean }>({});
   const [editingReportLinks, setEditingReportLinks] = useState<{ [key: string]: boolean }>({});
   const [reportLinks, setReportLinks] = useState<{ [key: string]: string }>({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedSprint, setSelectedSprint] = useState<number>(() => {
+    return Number(searchParams.get('sprint')) || 1;
+  });
+
+  // Update URL when team selection changes
+  useEffect(() => {
+    if (selectedSprint === 1) {
+      searchParams.delete('sprint');
+    } else {
+      searchParams.set('sprint', String(selectedSprint));
+    }
+    setSearchParams(searchParams);
+  }, [selectedSprint, searchParams]);
 
   const sprints = [1, 2, 3, 4, 5];
 

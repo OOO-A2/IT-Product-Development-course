@@ -7,6 +7,7 @@ import type { User } from "./types/types";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from "./auth/LoginPage";
 import Layout from "./Layout";
+import AllStudentsDashboard from "./instructor/grading/AllStudentsDashboard";
 
 function App() {
 
@@ -58,6 +59,7 @@ function App() {
               <Layout user={user} onLogout={handleLogout} role="instructor">
                 <Routes>
                   <Route index element={<Dashboard />} />
+                  <Route path="students" element={<AllStudentsDashboard />} />
                   <Route path="reviews" element={<AllReviews />} />
                   <Route path="*" element={<Navigate to="/instructor" replace />} />
                 </Routes>
