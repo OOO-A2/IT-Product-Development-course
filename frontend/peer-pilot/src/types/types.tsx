@@ -23,7 +23,9 @@ export interface PeerReview {
   sprint: number;
   reviewingTeamId: string;
   reviewedTeamId: string;
-  reviewLink: string;
+  reviewedTeamReportLink?: string,
+  summaryPDFLink?: string,
+  commentsPDFLink?: string,
   status: 'pending' | 'submitted' | 'graded';
   submittedAt: Date | null;
   dueDate?: Date;

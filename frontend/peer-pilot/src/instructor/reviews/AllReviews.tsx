@@ -122,10 +122,10 @@ export default function InstructorPeerReview() {
     const filesToDownload = currentSprintReviews.flatMap(review => {
       const files = [];
 
-      if (review.reviewLink) {
+      if (review.summaryPDFLink) {
         files.push({
           name: `summary-review-${review.reviewingTeamId}-sprint-${selectedSprint}.pdf`,
-          url: review.reviewLink
+          url: review.summaryPDFLink
         });
       }
 
@@ -367,12 +367,12 @@ export default function InstructorPeerReview() {
                           {/* Review Documents */}
                           <div className="space-y-2">
                             <div className="flex items-center space-x-2">
-                              {review.reviewLink ? (
+                              {review.summaryPDFLink ? (
                                 <>
                                   <FileText className="w-4 h-4 text-green-600" />
                                   <div className="flex items-center space-x-4">
                                     <button
-                                      onClick={() => downloadReview(review.reviewLink!)}
+                                      onClick={() => downloadReview(review.summaryPDFLink!)}
                                       className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
                                     >
                                       <span>Summary Review</span>

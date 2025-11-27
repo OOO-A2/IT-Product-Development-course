@@ -67,7 +67,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
 
     // Update the review with grades and link
     onUpdateReview(reviewId, {
-      reviewLink: fakeDriveLink,
+      summaryPDFLink: fakeDriveLink,
       status: 'submitted',
       submittedAt: new Date(),
       suggestedGrades: suggestedGrades[reviewId]
@@ -90,12 +90,9 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
 
   const downloadWorkToReview = (assignment: PeerReview) => {
     // In real implementation, this would download the actual work
-    console.log('Downloading work for review:', assignment.reviewedTeamId);
     alert(`Downloading work from Team ${assignment.reviewedTeamId.replace('t', '')} for Sprint ${assignment.sprint}`);
 
-    // Simulate download
-    const fakeWorkUrl = `https://example.com/team-${assignment.reviewedTeamId}-sprint-${assignment.sprint}.pdf`;
-    window.open(fakeWorkUrl, '_blank');
+    window.open(assignment.reviewedTeamReportLink, '_blank');
   };
 
   const getStatusIcon = (status: PeerReview['status']) => {
@@ -168,9 +165,9 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(assignment.status)}`}>
+                  {assignment.status !== 'graded' && <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(assignment.status)}`}>
                     {getStatusText(assignment.status)}
-                  </span>
+                  </span>} 
                   {assignment.status === 'graded' && (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
                       Grade: {getReviewGrade(assignment)}/100
@@ -223,10 +220,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Iteration Grade (I) *
                       </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
+                      <input type="number" min="0" max="100"
                         value={suggestedGrades[assignment.id]?.iteration ?? ''}
                         onChange={(e) => handleGradeChange(assignment.id, 'iteration', Number(e.target.value))}
                         disabled={assignment.status === 'submitted' || assignment.status === 'graded'}
@@ -248,14 +242,14 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
 
                 {/* File Upload Section */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">Submit Review</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">Submit Report with Comments and Summary review</h4>
 
-                  {assignment.reviewLink ? (
+                  {assignment.commentsPDFLink ? (
                     <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center space-x-2">
                           <CheckCircle className="w-5 h-5 text-green-500" />
-                          <span className="text-sm font-medium text-green-800">Review Submitted</span>
+                          <span className="text-sm font-medium text-green-800">Comments submitted</span>
                         </div>
                         <button
                           onClick={() => handleDeleteReview(assignment.id)}
@@ -267,11 +261,77 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                       </div>
                       <div className="space-y-2">
                         <button
-                          onClick={() => window.open(assignment.reviewLink!, '_blank')}
+                          onClick={() => window.open(assignment.summaryPDFLink!, '_blank')}
                           className="flex items-center space-x-2 text-sm text-green-700 hover:text-green-800 transition-colors"
                         >
                           <FileText className="w-4 h-4" />
-                          <span>View submitted document</span>
+                          <span>View comments PDF</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                      <div className="text-center">
+                        <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 mb-3">
+                          Upload report with your <b>comments</b>
+                        </p>
+
+                        <input type="file" id={`file-comments-upload-${assignment.id}`} accept=".pdf"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleFileUpload(assignment.id, file);
+                            }
+                          }}
+                          className="hidden"
+                          disabled={uploadingId === assignment.id}
+                        />
+
+                        <label htmlFor={`file-comments-upload-${assignment.id}`}
+                          className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${uploadingId === assignment.id
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+                            }`}
+                        >
+                          {uploadingId === assignment.id ? (
+                            <><Clock className="w-4 h-4 animate-spin" />
+                              <span>Uploading...</span></>
+                          ) : (<><Upload className="w-4 h-4" />
+                            <span>Upload PDF</span></>
+                          )}
+                        </label>
+
+                        <p className="text-xs text-gray-500 mt-2">
+                          Max file size: 10MB • PDF format only
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <br/>
+                  {assignment.summaryPDFLink ? (
+                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                          <span className="text-sm font-medium text-green-800">Summary submitted</span>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteReview(assignment.id)}
+                          className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors"
+                          title="Delete review"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => window.open(assignment.summaryPDFLink!, '_blank')}
+                          className="flex items-center space-x-2 text-sm text-green-700 hover:text-green-800 transition-colors"
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>View summary PDF</span>
                           <ExternalLink className="w-3 h-3" />
                         </button>
                         {assignment.suggestedGrades && (
@@ -290,7 +350,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                       <div className="text-center">
                         <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-600 mb-3">
-                          Upload your review summary
+                          Upload your review <b>summary</b>
                         </p>
 
                         <input
