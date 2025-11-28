@@ -201,7 +201,7 @@ export default function InstructorGrading() {
   const restoreScrollPosition = () => {
     const saved = localStorage.getItem('tableScroll');
     if (saved && tableContainerRef.current) {
-      const { scrollLeft, scrollTop } = JSON.parse(saved);
+      const { scrollLeft, scrollTtop } = JSON.parse(saved);
 
       // Use setTimeout to ensure DOM is ready
       setTimeout(() => {
@@ -352,7 +352,7 @@ export default function InstructorGrading() {
                               <div className="flex flex-col items-center">
                                 <span>{assignment}</span>
                                 <span className="text-xs font-normal text-gray-400 normal-case">
-                                  {assignmentNames[assignment]}
+                                  {assignment === 'ET' ? 'Extra' : assignmentNames[assignment]}
                                 </span>
                               </div>
                             </th>
