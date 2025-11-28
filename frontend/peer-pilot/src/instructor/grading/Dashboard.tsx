@@ -201,13 +201,12 @@ export default function InstructorGrading() {
   const restoreScrollPosition = () => {
     const saved = localStorage.getItem('tableScroll');
     if (saved && tableContainerRef.current) {
-      const { scrollLeft, scrollTtop } = JSON.parse(saved);
+      const { scrollLeft } = JSON.parse(saved);
 
       // Use setTimeout to ensure DOM is ready
       setTimeout(() => {
         if (tableContainerRef.current) {
           tableContainerRef.current.scrollLeft = scrollLeft;
-          tableContainerRef.current.scrollTop = scrollTop;
         }
       }, 0);
     }
