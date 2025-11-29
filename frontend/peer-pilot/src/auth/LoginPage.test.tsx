@@ -4,7 +4,7 @@
 
     describe('MyComponent', () => {
       it('renders the correct text', () => {
-        render(<LoginPage />);
+        render(<LoginPage onLogin={()=>{}} />);
         expect(screen.getByText('Sign in to continue to your account')).toBeInTheDocument();
       })
     });

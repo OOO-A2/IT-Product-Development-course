@@ -1,4 +1,21 @@
-import type { Grade, PeerReview, Student } from "../types/types";
+import type { Grade, PeerReview, Student, User, UserRole } from "../types/types";
+
+export const mockUsers: User[] = [
+    {
+      id: '1',
+      name: 'Professor Denis',
+      email: 'denis@innopolis.ru',
+      role: 'instructor' as UserRole,
+      teamId: ''
+    },
+    {
+      id: '2',
+      name: 'Arsen',
+      email: 'arsen@innopolis.university',
+      role: 'student' as UserRole,
+      teamId: 't1'
+    }
+  ];
 
 export const mockStudent: Student = {
     id: 's1',
@@ -52,7 +69,9 @@ export const reviewAssignments: Array<PeerReview> = [
         sprint: 1,
         reviewingTeamId: 't1',
         reviewedTeamId: 't2',
-        reviewLink: 'https://drive.google.com/file/d/abc123/view',
+        reviewedTeamReportLink: 'https://drive.google.com/file/d/abc123/view',
+        summaryPDFLink: 'https://drive.google.com/file/d/abc123/view',
+        commentsPDFLink: 'https://drive.google.com/file/d/abc123/view',
         status: 'graded',
         submittedAt: new Date('2024-01-15'),
         suggestedGrades: {
@@ -65,7 +84,8 @@ export const reviewAssignments: Array<PeerReview> = [
         sprint: 2,
         reviewingTeamId: 't1',
         reviewedTeamId: 't3',
-        reviewLink: 'https://drive.google.com/file/d/abc123/view',
+        reviewedTeamReportLink: 'https://drive.google.com/file/d/abc123/view',
+        summaryPDFLink: 'https://drive.google.com/file/d/abc123/view',
         status: 'submitted',
         submittedAt: new Date('2024-01-15'),
         suggestedGrades: {
@@ -78,7 +98,6 @@ export const reviewAssignments: Array<PeerReview> = [
         sprint: 3,
         reviewingTeamId: 't1',
         reviewedTeamId: 't5',
-        reviewLink: '',
         status: 'pending',
         submittedAt: null,
         dueDate: new Date(),
@@ -91,7 +110,7 @@ export const mockReviews: Array<PeerReview> = [
       sprint: 1,
       reviewingTeamId: 't1',
       reviewedTeamId: 't2',
-      reviewLink: 'https://drive.google.com/file/d/abc123/view',
+      summaryPDFLink: 'https://drive.google.com/file/d/abc123/view',
       status: 'submitted',
       submittedAt: new Date('2024-01-15'),
       suggestedGrades: {
@@ -104,7 +123,7 @@ export const mockReviews: Array<PeerReview> = [
       sprint: 1,
       reviewingTeamId: 't2',
       reviewedTeamId: 't3',
-      reviewLink: '',
+      summaryPDFLink: '',
       status: 'pending',
       submittedAt: null,
     },
@@ -113,7 +132,7 @@ export const mockReviews: Array<PeerReview> = [
       sprint: 1,
       reviewingTeamId: 't3',
       reviewedTeamId: 't1',
-      reviewLink: 'https://drive.google.com/file/d/def456/view',
+      summaryPDFLink: 'https://drive.google.com/file/d/def456/view',
       status: 'submitted',
       submittedAt: new Date('2024-01-16'),
       suggestedGrades: {
@@ -122,3 +141,5 @@ export const mockReviews: Array<PeerReview> = [
         }
     },
   ]
+
+  export const mockSprints = [1, 2, 3, 4]

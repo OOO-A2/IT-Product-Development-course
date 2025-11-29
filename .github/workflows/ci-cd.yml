@@ -1,7 +1,7 @@
 name: CI/CD
 on:
   push:
-    branches: [ main, frontend ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -72,7 +72,7 @@ jobs:
         working-directory: frontend/peer-pilot
         run: |
             COVERAGE_THRESHOLD=30
-            COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '"pct":[0-9]*' | grep -o '[0-9]*$' | tail -1 )
+            COVERAGE_PCT=$(grep -o '"pct":\([0-9.]*\)' coverage/coverage-summary.json | head -1 | cut -d: -f2 | cut -d. -f1)
             echo "Current coverage: $COVERAGE_PCT%"
             echo "Required threshold: $COVERAGE_THRESHOLD%"
             if [ $(echo "$COVERAGE_PCT < $COVERAGE_THRESHOLD" | bc -l) -eq 1 ]; then
@@ -130,7 +130,7 @@ jobs:
       # --- ADDING COVERAGE ---
       - name: Add coverage to job summary
         run: |
-            FRONTEND_COVERAGE_PCT=$(grep -o '"lines"[^}]*"pct":[0-9.]*' frontend/peer-pilot/coverage/coverage-summary.json | grep -o '"pct":[0-9]*' | grep -o '[0-9]*$' | tail -1 )
+            FRONTEND_COVERAGE_PCT=$(grep -o '"pct":\([0-9.]*\)' coverage/coverage-summary.json | head -1 | cut -d: -f2 | cut -d. -f1)
             BACKEND_COVERAGE_PCT=$(python - << 'PY'
             import xml.etree.ElementTree as ET
             root = ET.parse("backend/peer-pilot/coverage.xml").getroot()

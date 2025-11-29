@@ -23,7 +23,9 @@ export interface PeerReview {
   sprint: number;
   reviewingTeamId: string;
   reviewedTeamId: string;
-  reviewLink: string;
+  reviewedTeamReportLink?: string,
+  summaryPDFLink?: string,
+  commentsPDFLink?: string,
   status: 'pending' | 'submitted' | 'graded';
   submittedAt: Date | null;
   dueDate?: Date;
@@ -64,4 +66,14 @@ export interface TeamGrade {
   assignment: AssignmentLetter;
   score: number;
   comments?: string;
+}
+
+export type UserRole = 'instructor' | 'student';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  teamId: string;
 }

@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Search, Save, Calendar, ExternalLink, FileText, Clock, Edit, Check, X } from 'lucide-react';
-import type { Grade, Student, Team, PeerReview } from '../../types/types';
+import { useEffect, useState } from 'react';
+import { Search, Save, Calendar, ExternalLink, FileText, Clock, Edit, Check, X, Download } from 'lucide-react';
+import { type Grade, type Student, type Team, type PeerReview, assignments, assignmentNames, type AssignmentLetter } from '../../types/types';
 import { mockGrades, mockReviews, mockStudents, mockTeams } from '../../data/mock';
+import { useSearchParams } from 'react-router-dom';
+import { getGradeColor100 } from '../../utils/utils';
 
 export default function InstructorPeerReview() {
   // Mock data
@@ -10,30 +12,45 @@ export default function InstructorPeerReview() {
   const [grades, setGrades] = useState<Grade[]>(mockGrades);
   const [students] = useState<Student[]>(mockStudents);
 
-  const [selectedSprint, setSelectedSprint] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingGrades, setEditingGrades] = useState<{ [key: string]: boolean }>({});
   const [editingReportLinks, setEditingReportLinks] = useState<{ [key: string]: boolean }>({});
   const [reportLinks, setReportLinks] = useState<{ [key: string]: string }>({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedSprint, setSelectedSprint] = useState<number>(() => {
+    return Number(searchParams.get('sprint')) || 1;
+  });
+
+  // Update URL when team selection changes
+  useEffect(() => {
+    if (selectedSprint === 1) {
+      searchParams.delete('sprint');
+    } else {
+      searchParams.set('sprint', String(selectedSprint));
+    }
+    setSearchParams(searchParams);
+  }, [selectedSprint, searchParams, setSearchParams]);
 
   const sprints = [1, 2, 3, 4, 5];
 
   // Get peer reviews for current sprint
   const currentSprintReviews = peerReviews.filter(review => review.sprint === selectedSprint);
 
-  const getTeamReviewGrade = (teamId: string, sprint: number): number => {
+  // Get team grade for a specific assignment type
+  const getTeamAssignmentGrade = (teamId: string, sprint: number, assignment: string): number => {
     const teamStudents = students.filter(student => student.teamId === teamId);
     if (teamStudents.length === 0) return 0;
 
     const teamGrades = teamStudents.map(student =>
-      grades.find(g => g.studentId === student.id && g.sprint === sprint && g.assignment === 'R')?.score ?? 0
+      grades.find(g => g.studentId === student.id && g.sprint === sprint && g.assignment === assignment)?.score ?? 0
     );
 
     return Math.round(teamGrades.reduce((acc, score) => acc + score, 0) / teamGrades.length);
   };
 
-  const updateTeamReviewGrade = (teamId: string, sprint: number, score: number) => {
+  // Update team assignment grade
+  const updateTeamAssignmentGrade = (teamId: string, sprint: number, assignment: AssignmentLetter, score: number) => {
     const validScore = Math.max(0, Math.min(100, score));
     const teamStudents = students.filter(student => student.teamId === teamId);
 
@@ -42,13 +59,13 @@ export default function InstructorPeerReview() {
 
       teamStudents.forEach(student => {
         const existingIndex = updated.findIndex(
-          g => g.studentId === student.id && g.sprint === sprint && g.assignment === 'R'
+          g => g.studentId === student.id && g.sprint === sprint && g.assignment === assignment
         );
 
         if (existingIndex >= 0) {
           updated[existingIndex] = { ...updated[existingIndex], score: validScore };
         } else {
-          updated.push({ studentId: student.id, sprint, assignment: 'R', score: validScore });
+          updated.push({ studentId: student.id, sprint, assignment, score: validScore });
         }
       });
 
@@ -65,7 +82,7 @@ export default function InstructorPeerReview() {
     }));
 
     // Update the peer review with the assigned work description
-    const reviewToUpdate = peerReviews.find(review => 
+    const reviewToUpdate = peerReviews.find(review =>
       review.reviewedTeamId === reviewedTeamId && review.sprint === sprint
     );
 
@@ -88,6 +105,47 @@ export default function InstructorPeerReview() {
 
   const downloadReview = (reviewLink: string) => {
     window.open(reviewLink, '_blank');
+  };
+
+  // Download detailed review with comments (mock function)
+  const downloadDetailedReview = (reviewId: string) => {
+    const review = peerReviews.find(r => r.id === reviewId);
+    if (review) {
+      const fakeDetailedReviewLink = `https://drive.google.com/file/d/detailed-${reviewId}/view`;
+      window.open(fakeDetailedReviewLink, '_blank');
+      alert(`Downloading detailed review with comments for ${review.reviewingTeamId}`);
+    }
+  };
+
+  // Download all files for current sprint
+  const downloadAllFiles = () => {
+    const filesToDownload = currentSprintReviews.flatMap(review => {
+      const files = [];
+
+      if (review.summaryPDFLink) {
+        files.push({
+          name: `summary-review-${review.reviewingTeamId}-sprint-${selectedSprint}.pdf`,
+          url: review.summaryPDFLink
+        });
+      }
+
+      // Add detailed review (mock)
+      files.push({
+        name: `detailed-review-${review.reviewingTeamId}-sprint-${selectedSprint}.pdf`,
+        url: `https://drive.google.com/file/d/detailed-${review.id}/view`
+      });
+
+      return files;
+    });
+
+    // Simulate batch download
+    console.log('Downloading all files:', filesToDownload);
+    alert(`Preparing to download ${filesToDownload.length} files for Sprint ${selectedSprint}`);
+
+    // In real implementation, this would trigger batch download
+    filesToDownload.forEach(file => {
+      window.open(file.url, '_blank');
+    });
   };
 
   const filteredReviews = currentSprintReviews.filter(review => {
@@ -119,9 +177,13 @@ export default function InstructorPeerReview() {
             </div>
 
             <div className="flex items-center space-x-3">
-              {unsavedChanges && (
-                <span className="text-sm text-orange-600 font-medium">Unsaved changes</span>
-              )}
+              <button
+                onClick={downloadAllFiles}
+                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download All Sprint Files</span>
+              </button>
               <button
                 onClick={handleSave}
                 disabled={!unsavedChanges}
@@ -130,6 +192,9 @@ export default function InstructorPeerReview() {
                 <Save className="w-4 h-4" />
                 <span>Save Changes</span>
               </button>
+              {unsavedChanges && (
+                <span className="text-sm text-orange-600 font-medium">Unsaved changes</span>
+              )}
             </div>
           </div>
         </div>
@@ -191,10 +256,10 @@ export default function InstructorPeerReview() {
                     Reviewing team Assignment Link
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Review Document & Suggested Grades
+                    Download Review Documents & Suggested Grades
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Review Grade (R)
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" colSpan={5}>
+                    Reviewing Team Grades
                   </th>
                 </tr>
               </thead>
@@ -202,8 +267,6 @@ export default function InstructorPeerReview() {
                 {filteredReviews.map(review => {
                   const reviewingTeam = teams.find(t => t.id === review.reviewingTeamId);
                   const reviewedTeam = teams.find(t => t.id === review.reviewedTeamId);
-                  const currentGrade = getTeamReviewGrade(review.reviewingTeamId, selectedSprint);
-                  const isEditing = editingGrades[review.id];
                   const isEditingReportLink = editingReportLinks[review.id];
                   const currentReportLink = getReportLink(review.reviewedTeamId, selectedSprint);
 
@@ -298,37 +361,48 @@ export default function InstructorPeerReview() {
                         </div>
                       </td>
 
-                      {/* Review Document & Suggested Grades */}
+                      {/* Review Documents & Suggested Grades */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="space-y-2">
-                          {/* Review Document */}
-                          <div className="flex items-center space-x-2">
-                            {review.reviewLink ? (
-                              <>
-                                <FileText className="w-4 h-4 text-green-600" />
-                                <button
-                                  onClick={() => downloadReview(review.reviewLink!)}
-                                  className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
-                                >
-                                  <span>View Review Document</span>
-                                  <ExternalLink className="w-3 h-3" />
-                                </button>
-                                <div className="text-xs text-gray-500">
-                                  {review.submittedAt?.toLocaleDateString()}
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-gray-500">Not submitted</span>
-                              </>
-                            )}
+                        <div className="space-y-3">
+                          {/* Review Documents */}
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              {review.summaryPDFLink ? (
+                                <>
+                                  <FileText className="w-4 h-4 text-green-600" />
+                                  <div className="flex items-center space-x-4">
+                                    <button
+                                      onClick={() => downloadReview(review.summaryPDFLink!)}
+                                      className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                                    >
+                                      <span>Summary Review</span>
+                                      <ExternalLink className="w-3 h-3" />
+                                    </button>
+                                    <button
+                                      onClick={() => downloadDetailedReview(review.id)}
+                                      className="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-800 transition-colors"
+                                    >
+                                      <span>Review with Comments</span>
+                                      <Download className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {review.submittedAt?.toLocaleDateString()}
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <Clock className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm text-gray-500">Not submitted</span>
+                                </>
+                              )}
+                            </div>
                           </div>
 
                           {/* Suggested Grades */}
                           {review.suggestedGrades && (
                             <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                              <div className="text-xs font-medium text-blue-900 mb-1">Suggested Grades:</div>
+                              <div className="text-xs font-medium text-blue-900 mb-2">Suggested Grades:</div>
                               <div className="grid grid-cols-2 gap-2 text-xs">
                                 <div className="text-blue-800">
                                   <strong>Assignment (A):</strong> {review.suggestedGrades.assignment}/100
@@ -344,42 +418,45 @@ export default function InstructorPeerReview() {
                         </div>
                       </td>
 
-                      {/* Review Grade */}
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        {isEditing ? (
-                          <div className="flex items-center justify-center space-x-2">
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={currentGrade}
-                              onChange={(e) => updateTeamReviewGrade(review.reviewingTeamId, selectedSprint, Number(e.target.value))}
-                              onBlur={() => setEditingGrades(prev => ({ ...prev, [review.id]: false }))}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === 'Escape') {
-                                  setEditingGrades(prev => ({ ...prev, [review.id]: false }));
-                                }
-                              }}
-                              autoFocus
-                              className="w-20 px-2 py-1 text-center border-2 border-blue-500 rounded focus:outline-none"
-                            />
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setEditingGrades(prev => ({ ...prev, [review.id]: true }))}
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold transition-colors ${
-                              currentGrade >= 90 ? 'bg-green-100 text-green-800 hover:bg-green-200' :
-                              currentGrade >= 80 ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
-                              currentGrade >= 70 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
-                              currentGrade >= 60 ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' :
-                              currentGrade > 0 ? 'bg-red-100 text-red-800 hover:bg-red-200' :
-                              'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                            }`}
-                          >
-                            {currentGrade || 'Add Grade'}
-                          </button>
-                        )}
-                      </td>
+                      {/* Team Grades - All 5 assignment types */}
+                      {assignments.map(assignment => {
+                        if (assignment === 'E') return
+                        const currentGrade = getTeamAssignmentGrade(review.reviewingTeamId, selectedSprint, assignment);
+                        const isEditing = editingGrades[`${review.id}-${assignment}`];
+
+                        return (
+                          <td key={`${review.id}-${assignment}`} className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-100">
+                            <div className="flex flex-col items-center space-y-1">
+                              <div className="text-xs font-medium text-gray-500">
+                                {assignmentNames[assignment]}
+                              </div>
+                              {isEditing ? (
+                                <div className="flex items-center space-x-1">
+                                  <input type="number" min="0" max="100"
+                                    value={currentGrade}
+                                    onChange={(e) => updateTeamAssignmentGrade(review.reviewingTeamId, selectedSprint, assignment, Number(e.target.value))}
+                                    onBlur={() => setEditingGrades(prev => ({ ...prev, [`${review.id}-${assignment}`]: false }))}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' || e.key === 'Escape') {
+                                        setEditingGrades(prev => ({ ...prev, [`${review.id}-${assignment}`]: false }));
+                                      }
+                                    }}
+                                    autoFocus
+                                    className="w-16 px-2 py-1 text-center border-2 border-blue-500 rounded focus:outline-none text-sm"
+                                  />
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setEditingGrades(prev => ({ ...prev, [`${review.id}-${assignment}`]: true }))}
+                                  className={`w-16 px-2 py-1 rounded font-medium transition-colors text-sm ${getGradeColor100(currentGrade)}`}
+                                >
+                                  {currentGrade || '-'}
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        );
+                      })}
                     </tr>
                   );
                 })}
