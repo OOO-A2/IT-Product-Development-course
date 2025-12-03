@@ -1,4 +1,4 @@
-import type { Grade, PeerReview, Project, Student, User, UserRole } from "../types/types";
+import type { Grade, PeerReview, Project, Student, Team, User, UserRole } from "../types/types";
 
 export const mockUsers: User[] = [
     {
@@ -24,10 +24,10 @@ export const mockStudent: Student = {
     teamId: 't1'
 };
 
-export const mockTeams = [
-    { id: 't1', name: 'Team Alpha', color: 'bg-blue-500' },
-    { id: 't2', name: 'Team Beta', color: 'bg-yellow-500' },
-    { id: 't3', name: 'Team Gamma', color: 'bg-purple-500' },
+export const mockTeams: Array<Team> = [
+    { id: 't1', name: 'Team Alpha', color: 'bg-blue-500', students: [], isLocked: true },
+    { id: 't2', name: 'Team Beta', color: 'bg-yellow-500', students: [], isLocked: true },
+    { id: 't3', name: 'Team Gamma', color: 'bg-purple-500', students: [], isLocked: true },
 ];
 
 export const mockStudents: Array<Student> = [

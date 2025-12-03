@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Plus, User, Shield, Lock, Unlock, Edit2, Check, Users } from 'lucide-react';
+import { Plus, User, Shield, Lock, Edit2, Check, Users } from 'lucide-react';
 import { type Project, type Student, type Team, type UserRole } from './types/types';
 import { mockProjects, mockStudent } from './data/mock';
 
 
 interface TeamManagementProps {
-  role: 'instructor' | 'student';
+  role: UserRole;
 }
 
 export default function TeamManagement({ role }: TeamManagementProps) {
@@ -48,6 +48,7 @@ export default function TeamManagement({ role }: TeamManagementProps) {
 
   // 2. Student chooses a free slot
   const handleJoinTeam = (projectId: string, teamId: string, asRep: boolean) => {
+    if (projects.some(p => p.teams.some(t => t.isLocked && t.students.some(s => s.id === student.id)))) return;
     setProjects(projects.map(p => {
       if (projectId !== p.id) return p;
       return {

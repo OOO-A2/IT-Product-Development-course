@@ -3,7 +3,7 @@ export interface Student {
   name: string
   email: string
   teamId: string
-  isRep: boolean
+  isRep?: boolean
 }
 
 export interface Grade {
