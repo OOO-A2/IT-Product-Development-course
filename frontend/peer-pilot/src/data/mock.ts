@@ -155,7 +155,7 @@ export const mockProjects: Array<Project> = [
                 "id": "d56b4c61-dd4f-4539-888b-ee5c55c6ac4a",
                 "name": "Team 1",
                 "students": [],
-                "isLocked": false
+                "isLocked": true
             },
             {
                 "id": "3651d899-710d-4fbd-8344-3326d3802ffc",

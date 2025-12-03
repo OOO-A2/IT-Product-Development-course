@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, User, Shield, Lock, Unlock, Edit2, Check, Users } from 'lucide-react';
-import { type Project, type Team, type UserRole } from './types/types';
-import { mockProjects } from './data/mock';
+import { type Project, type Student, type Team, type UserRole } from './types/types';
+import { mockProjects, mockStudent } from './data/mock';
 
 
 interface TeamManagementProps {
@@ -9,6 +9,7 @@ interface TeamManagementProps {
 }
 
 export default function TeamManagement({ role }: TeamManagementProps) {
+  const [student] = useState<Student>(mockStudent);
   const [projects, setProjects] = useState<Project[]>(mockProjects);
 
   // Form State for Instructor
@@ -48,18 +49,11 @@ export default function TeamManagement({ role }: TeamManagementProps) {
   // 2. Student chooses a free slot
   const handleJoinTeam = (projectId: string, teamId: string, asRep: boolean) => {
     setProjects(projects.map(p => {
-      if (p.id !== projectId) return p;
-
-      // Check if user is already in this project (optional rule)
-      const alreadyInProject = p.teams.some(t => t.students.some(m => m.id === MOCK_USER_ID));
-      if (alreadyInProject) {
-        alert("You are already in a team for this project!");
-        return p;
-      }
-
+      if (projectId !== p.id) return p;
       return {
         ...p,
         teams: p.teams.map(t => {
+          t.students = [...(t.students.filter(s => s.id !== student.id))] // Remove a student from all teams
           if (t.id !== teamId) return t;
           if (t.students.length >= p.maxStudentsPerTeam) return t; // Full
           if (t.isLocked) return t; // Locked by instructor
@@ -72,7 +66,7 @@ export default function TeamManagement({ role }: TeamManagementProps) {
             ...t,
             students: [
               ...t.students,
-              { id: MOCK_USER_ID, name: MOCK_USER_NAME, isRep: asRep }
+              { ...student, isRep: asRep }
             ]
           };
         })
@@ -108,6 +102,10 @@ export default function TeamManagement({ role }: TeamManagementProps) {
       };
     }));
   };
+
+  const teamHasRepr = (team: Team) => {
+    return team.students.some(m => m.isRep);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 font-sans text-gray-800">
@@ -172,7 +170,7 @@ export default function TeamManagement({ role }: TeamManagementProps) {
                 const isFull = team.students.length >= project.maxStudentsPerTeam;
                 const hasRep = team.students.some(m => m.isRep);
                 const amIMember = team.students.some(m => m.id === '');
-                const amIRep = team.students.some(m => m.id === '' && m.isRep);
+                const amIRep = team.students.some(m => m.isRep);
 
                 return (
                   <div key={team.id} className={`
@@ -200,9 +198,9 @@ export default function TeamManagement({ role }: TeamManagementProps) {
                           <h3 className="font-bold text-lg text-gray-800">{team.name}</h3>
                           {amIRep && !team.isLocked && (
                             <button onClick={() => {
-                                setEditingTeamId(team.id);
-                                setTempTeamName(team.name);
-                              }}
+                              setEditingTeamId(team.id);
+                              setTempTeamName(team.name);
+                            }}
                               className="text-gray-400 hover:text-indigo-600"
                             >
                               <Edit2 size={14} />
@@ -264,7 +262,7 @@ export default function TeamManagement({ role }: TeamManagementProps) {
                         ))}
 
                         {/* Empty Slots */}
-                        {Array.from({ length: Math.max(0, project.maxStudentsPerTeam - team.students.length - 1) }).map((_, i) => (
+                        {Array.from({ length: Math.max(0, project.maxStudentsPerTeam - team.students.length - (teamHasRepr(team) ? 0 : 1)) }).map((_, i) => (
                           <div key={i} className="flex items-center justify-between p-2 border border-dashed border-gray-200 rounded">
                             <div className="flex items-center gap-2">
                               <User className="w-4 h-4 text-gray-300" />
