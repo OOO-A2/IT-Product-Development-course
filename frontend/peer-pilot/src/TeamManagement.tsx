@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, User, Shield, Lock, Unlock, Edit2, Check, Users } from 'lucide-react';
-import { type Team, type UserRole } from './types/types';
-
-interface Project {
-  id: string;
-  name: string;
-  maxTeams: number;
-  maxStudentsPerTeam: number;
-  teams: Team[];
-}
+import { type Project, type Team, type UserRole } from './types/types';
+import { mockProjects } from './data/mock';
 
 
 interface TeamManagementProps {
@@ -16,7 +9,7 @@ interface TeamManagementProps {
 }
 
 export default function TeamManagement({ role }: TeamManagementProps) {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(mockProjects);
 
   // Form State for Instructor
   const [newProjectName, setNewProjectName] = useState('');
@@ -49,6 +42,7 @@ export default function TeamManagement({ role }: TeamManagementProps) {
 
     setProjects([...projects, newProject]);
     setNewProjectName('');
+    console.log([...projects, newProject])
   };
 
   // 2. Student chooses a free slot
@@ -121,7 +115,7 @@ export default function TeamManagement({ role }: TeamManagementProps) {
       {/* Header & Role Switcher */}
       <header className="max-w-6xl mx-auto mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-indigo-900">Course Team Manager</h1>
+          <h1 className="text-3xl font-bold text-indigo-900">Course Team Management</h1>
           <p className="text-gray-500">Select projects and form your teams</p>
         </div>
       </header>
@@ -137,31 +131,21 @@ export default function TeamManagement({ role }: TeamManagementProps) {
             <form onSubmit={handleAddProject} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
-                <input
-                  type="text"
-                  required
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                  placeholder="e.g. Final Capstone 2024"
+                <input type="text" required value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)}
+                  placeholder="e.g. Course management system"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Total Teams</label>
-                <input
-                  type="number"
-                  min="1" max="20"
-                  value={newProjectMaxTeams}
+                <input type="number" min="1" max="20" value={newProjectMaxTeams}
                   onChange={(e) => setNewProjectMaxTeams(parseInt(e.target.value))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Max Students/Team</label>
-                <input
-                  type="number"
-                  min="1" max="10"
-                  value={newProjectMaxStudents}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Max Students per Team</label>
+                <input type="number" min="1" max="10" value={newProjectMaxStudents}
                   onChange={(e) => setNewProjectMaxStudents(parseInt(e.target.value))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
@@ -200,10 +184,7 @@ export default function TeamManagement({ role }: TeamManagementProps) {
                     <div className="flex justify-between items-start">
                       {editingTeamId === team.id ? (
                         <div className="flex gap-2 w-full">
-                          <input
-                            autoFocus
-                            type="text"
-                            value={tempTeamName}
+                          <input autoFocus type="text" value={tempTeamName}
                             onChange={(e) => setTempTeamName(e.target.value)}
                             className="flex-1 px-2 py-1 border rounded text-sm"
                           />
@@ -218,8 +199,7 @@ export default function TeamManagement({ role }: TeamManagementProps) {
                         <div className="flex items-center gap-2">
                           <h3 className="font-bold text-lg text-gray-800">{team.name}</h3>
                           {amIRep && !team.isLocked && (
-                            <button
-                              onClick={() => {
+                            <button onClick={() => {
                                 setEditingTeamId(team.id);
                                 setTempTeamName(team.name);
                               }}
@@ -260,7 +240,7 @@ export default function TeamManagement({ role }: TeamManagementProps) {
                         <div className="flex items-center gap-2">
                           <Shield className={`w-4 h-4 ${hasRep ? 'text-indigo-600' : 'text-gray-400'}`} />
                           <span className={`text-sm ${hasRep ? 'font-medium text-indigo-900' : 'text-gray-400 italic'}`}>
-                            {hasRep ? team.students.find(m => m.isRep)?.name : "Rep Slot Empty"}
+                            {hasRep ? team.students.find(m => m.isRep)?.name : "Representative slot"}
                           </span>
                         </div>
 
@@ -284,11 +264,11 @@ export default function TeamManagement({ role }: TeamManagementProps) {
                         ))}
 
                         {/* Empty Slots */}
-                        {Array.from({ length: Math.max(0, project.maxStudentsPerTeam - team.students.length) }).map((_, i) => (
+                        {Array.from({ length: Math.max(0, project.maxStudentsPerTeam - team.students.length - 1) }).map((_, i) => (
                           <div key={i} className="flex items-center justify-between p-2 border border-dashed border-gray-200 rounded">
                             <div className="flex items-center gap-2">
                               <User className="w-4 h-4 text-gray-300" />
-                              <span className="text-sm text-gray-400 italic">Open Slot</span>
+                              <span className="text-sm text-gray-400 italic">Student Slot</span>
                             </div>
                             {role === 'student' && !team.isLocked && !amIMember && (
                               <button

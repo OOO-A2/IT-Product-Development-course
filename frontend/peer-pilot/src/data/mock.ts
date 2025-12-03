@@ -1,21 +1,21 @@
-import type { Grade, PeerReview, Student, User, UserRole } from "../types/types";
+import type { Grade, PeerReview, Project, Student, User, UserRole } from "../types/types";
 
 export const mockUsers: User[] = [
     {
-      id: '1',
-      name: 'Professor Denis',
-      email: 'denis@innopolis.ru',
-      role: 'instructor' as UserRole,
-      teamId: ''
+        id: '1',
+        name: 'Professor Denis',
+        email: 'denis@innopolis.ru',
+        role: 'instructor' as UserRole,
+        teamId: ''
     },
     {
-      id: '2',
-      name: 'Arsen',
-      email: 'arsen@innopolis.university',
-      role: 'student' as UserRole,
-      teamId: 't1'
+        id: '2',
+        name: 'Arsen',
+        email: 'arsen@innopolis.university',
+        role: 'student' as UserRole,
+        teamId: 't1'
     }
-  ];
+];
 
 export const mockStudent: Student = {
     id: 's1',
@@ -106,40 +106,69 @@ export const reviewAssignments: Array<PeerReview> = [
 
 export const mockReviews: Array<PeerReview> = [
     {
-      id: 'pr1',
-      sprint: 1,
-      reviewingTeamId: 't1',
-      reviewedTeamId: 't2',
-      summaryPDFLink: 'https://drive.google.com/file/d/abc123/view',
-      status: 'submitted',
-      submittedAt: new Date('2024-01-15'),
-      suggestedGrades: {
+        id: 'pr1',
+        sprint: 1,
+        reviewingTeamId: 't1',
+        reviewedTeamId: 't2',
+        summaryPDFLink: 'https://drive.google.com/file/d/abc123/view',
+        status: 'submitted',
+        submittedAt: new Date('2024-01-15'),
+        suggestedGrades: {
             assignment: 13,
             iteration: 33
         }
     },
     {
-      id: 'pr2',
-      sprint: 1,
-      reviewingTeamId: 't2',
-      reviewedTeamId: 't3',
-      summaryPDFLink: '',
-      status: 'pending',
-      submittedAt: null,
+        id: 'pr2',
+        sprint: 1,
+        reviewingTeamId: 't2',
+        reviewedTeamId: 't3',
+        summaryPDFLink: '',
+        status: 'pending',
+        submittedAt: null,
     },
     {
-      id: 'pr3',
-      sprint: 1,
-      reviewingTeamId: 't3',
-      reviewedTeamId: 't1',
-      summaryPDFLink: 'https://drive.google.com/file/d/def456/view',
-      status: 'submitted',
-      submittedAt: new Date('2024-01-16'),
-      suggestedGrades: {
+        id: 'pr3',
+        sprint: 1,
+        reviewingTeamId: 't3',
+        reviewedTeamId: 't1',
+        summaryPDFLink: 'https://drive.google.com/file/d/def456/view',
+        status: 'submitted',
+        submittedAt: new Date('2024-01-16'),
+        suggestedGrades: {
             assignment: 13,
             iteration: 33
         }
     },
-  ]
+]
 
-  export const mockSprints = [1, 2, 3, 4]
+export const mockSprints = [1, 2, 3, 4]
+
+export const mockProjects: Array<Project> = [
+    {
+        "id": "c7bb38bb-6221-4228-9bb6-ab92c5ef7b1c",
+        "name": "Course management system",
+        "maxTeams": 3,
+        "maxStudentsPerTeam": 3,
+        "teams": [
+            {
+                "id": "d56b4c61-dd4f-4539-888b-ee5c55c6ac4a",
+                "name": "Team 1",
+                "students": [],
+                "isLocked": false
+            },
+            {
+                "id": "3651d899-710d-4fbd-8344-3326d3802ffc",
+                "name": "Team 2",
+                "students": [],
+                "isLocked": false
+            },
+            {
+                "id": "04f48ee7-1b9b-4fa9-bda0-d59f306312ff",
+                "name": "Team 3",
+                "students": [],
+                "isLocked": false
+            }
+        ]
+    }
+]

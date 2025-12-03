@@ -80,3 +80,11 @@ export interface User {
   role: UserRole;
   teamId: string;
 }
+
+export interface Project {
+  id: string;
+  name: string;
+  maxTeams: number;
+  maxStudentsPerTeam: number;
+  teams: Team[];
+}
