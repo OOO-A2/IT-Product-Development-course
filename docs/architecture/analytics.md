@@ -40,16 +40,8 @@ Measures feedback under 10 words or marked as low quality.
 ---
 
 ## 4. Metric Tree
-Weekly Active Feedback Exchanges (NSM)
-├── L1: Feedback Completion Rate (% of assigned feedback completed)
-│   └── L2: Feedback Assignment Clarity (clear rubrics, examples)
-├── L1: Feedback Quality Score (avg. rating 1-5 from receivers)
-│   └── L2: Helpful Feedback Ratio (% of feedback marked "helpful")
-├── L1: Feedback Engagement Rate (% of feedback viewed >30 seconds)
-│   └── L2: Feedback Response Rate (% of feedback receiving replies)
-└── L1: Platform Weekly Active Users
-    └── L2: New User Activation (% completing first feedback cycle)
 
+<img width="1125" height="246" alt="image" src="https://github.com/user-attachments/assets/6844e1a8-bbfb-4b6f-b2aa-50d5ff6be092" />
 
 ---
 
@@ -72,12 +64,7 @@ Weekly Active Feedback Exchanges (NSM)
 
 ### **Data Pipeline Overview**
 
-[Frontend] → [Event Collection SDK] → [Message Queue] → [Stream Processor] → [Data Warehouse]
-     ↑               ↓                      ↓                   ↓                 ↓
-[React App]    [Firebase Analytics]    [Apache Kafka]    [Apache Flink]    [PostgreSQL]
-     |           [Custom Events]            |                  |                 |
-     └──────→ [Backend API Logging] → [Log Shipper] → [ELK Stack for monitoring]
-
+<img width="1106" height="370" alt="image" src="https://github.com/user-attachments/assets/65c3a3b2-32e4-4922-9d30-e2fd40ab8385" />
 
 ### **Collection Strategy**
 - Frontend → Firebase custom events  
