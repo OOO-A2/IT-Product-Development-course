@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LoginPage from "./auth/LoginPage";
 import Layout from "./Layout";
 import AllStudentsDashboard from "./instructor/grading/AllStudentsDashboard";
+import TeamManagement from "./TeamManagement";
 
 function App() {
 
@@ -61,6 +62,7 @@ function App() {
                   <Route index element={<Dashboard />} />
                   <Route path="students" element={<AllStudentsDashboard />} />
                   <Route path="reviews" element={<AllReviews />} />
+                  <Route path="teams" element={<TeamManagement role="instructor" />} />
                   <Route path="*" element={<Navigate to="/instructor" replace />} />
                 </Routes>
               </Layout>
@@ -84,6 +86,7 @@ function App() {
                       students={mockStudents}
                       grades={mockGrades}
                       reviewAssignments={reviewAssignments} />} />
+                  <Route path="teams" element={<TeamManagement role="student" />} />    
                   <Route path="*" element={<Navigate to="/student" replace />} />
                 </Routes>
               </Layout>

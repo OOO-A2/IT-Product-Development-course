@@ -1,5 +1,3 @@
-// components/Layout.tsx
-// components/Layout.tsx
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LogOut, User, Home, Users, ChevronLeft, ChevronRight, Menu, X, ShieldCheck } from 'lucide-react';
@@ -13,17 +11,19 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, user, onLogout, role }: LayoutProps) {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
 
   const instructorNavItems = [
     { path: '/instructor', label: 'Dashboard', icon: Home },
     { path: '/instructor/students', label: 'All Students', icon: Users },
     { path: '/instructor/reviews', label: 'Reviews', icon: Users },
+    { path: '/instructor/teams', label: 'Accept Teams', icon: Users },
   ];
 
   const studentNavItems = [
     { path: '/student', label: 'Dashboard', icon: Home },
+    { path: '/student/teams', label: 'Choose a Team', icon: Users },
   ];
 
   const navItems = role === 'instructor' ? instructorNavItems : studentNavItems;
@@ -42,10 +42,9 @@ export default function Layout({ children, user, onLogout, role }: LayoutProps) 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar Navigation */}
-      <div 
-        className={`fixed inset-y-0 left-0 bg-white shadow-lg transition-all duration-300 z-30 ${
-          isSidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
-        }`}
+      <div
+        className={`fixed inset-y-0 left-0 bg-white shadow-lg transition-all duration-300 z-30 ${isSidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
+          }`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -68,21 +67,19 @@ export default function Layout({ children, user, onLogout, role }: LayoutProps) 
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = isActivePath(item.path);
-              
+
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                    isActive
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${isActive
                       ? 'bg-blue-50 text-blue-700 border border-blue-200'
                       : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
-                  <span className={`font-medium transition-opacity duration-300 ${
-                    isSidebarOpen ? 'opacity-100' : 'opacity-0'
-                  }`}>
+                  <span className={`font-medium transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'
+                    }`}>
                     {item.label}
                   </span>
                 </Link>
@@ -92,9 +89,8 @@ export default function Layout({ children, user, onLogout, role }: LayoutProps) 
 
           {/* User Info & Logout */}
           <div className="p-4 border-t border-gray-200">
-            <div className={`flex items-center space-x-3 mb-4 p-3 bg-gray-50 rounded-lg transition-opacity duration-300 ${
-              isSidebarOpen ? 'opacity-100' : 'opacity-0'
-            }`}>
+            <div className={`flex items-center space-x-3 mb-4 p-3 bg-gray-50 rounded-lg transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'
+              }`}>
               <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="w-4 h-4 text-white" />
               </div>
@@ -105,17 +101,15 @@ export default function Layout({ children, user, onLogout, role }: LayoutProps) 
                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
               </div>
             </div>
-            
+
             <button
               onClick={onLogout}
-              className={`flex items-center space-x-3 w-full px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ${
-                isSidebarOpen ? 'opacity-100' : 'opacity-0'
-              }`}
+              className={`flex items-center space-x-3 w-full px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ${isSidebarOpen ? 'opacity-100' : 'opacity-0'
+                }`}
             >
               <LogOut className="w-5 h-5 flex-shrink-0" />
-              <span className={`font-medium transition-opacity duration-300 ${
-                isSidebarOpen ? 'opacity-100' : 'opacity-0'
-              }`}>
+              <span className={`font-medium transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0'
+                }`}>
                 Logout
               </span>
             </button>
@@ -126,9 +120,8 @@ export default function Layout({ children, user, onLogout, role }: LayoutProps) 
       {/* Toggle Button */}
       <button
         onClick={toggleSidebar}
-        className={`fixed z-40 top-16 transition-all duration-300 ${
-          isSidebarOpen ? 'left-60' : 'left-4'
-        } w-8 h-8 bg-white border border-gray-300 rounded-lg shadow-md flex items-center justify-center hover:bg-gray-50 hover:shadow-lg`}
+        className={`fixed z-40 top-16 transition-all duration-300 ${isSidebarOpen ? 'left-60' : 'left-4'
+          } w-8 h-8 bg-white border border-gray-300 rounded-lg shadow-md flex items-center justify-center hover:bg-gray-50 hover:shadow-lg`}
       >
         {isSidebarOpen ? (
           <ChevronLeft className="w-4 h-4 text-gray-600" />
@@ -138,9 +131,8 @@ export default function Layout({ children, user, onLogout, role }: LayoutProps) 
       </button>
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 ${
-        isSidebarOpen ? 'pl-64' : 'pl-0'
-      }`}>
+      <div className={`transition-all duration-300 ${isSidebarOpen ? 'pl-64' : 'pl-0'
+        }`}>
         {/* Optional: Mobile menu button for small screens */}
         <div className="lg:hidden fixed top-9 right-4 z-40">
           <button
@@ -160,7 +152,7 @@ export default function Layout({ children, user, onLogout, role }: LayoutProps) 
 
       {/* Overlay for mobile */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
