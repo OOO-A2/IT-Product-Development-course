@@ -3,6 +3,7 @@ export interface Student {
   name: string
   email: string
   teamId: string
+  isRep?: boolean
 }
 
 export interface Grade {
@@ -15,7 +16,9 @@ export interface Grade {
 export interface Team {
   id: string
   name: string
-  color: string
+  color?: string
+  students: Student[]
+  isLocked: boolean // Instructor approval status
 }
 
 export interface PeerReview {
@@ -76,4 +79,12 @@ export interface User {
   email: string;
   role: UserRole;
   teamId: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  maxTeams: number;
+  maxStudentsPerTeam: number;
+  teams: Team[];
 }
