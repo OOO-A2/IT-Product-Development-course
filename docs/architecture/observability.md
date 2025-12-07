@@ -151,7 +151,7 @@ Check for long-running transactions:
 SELECT pid, query, now() - pg_stat_activity.query_start AS duration
 FROM pg_stat_activity 
 WHERE state = 'active' AND now() - pg_stat_activity.query_start > interval '5 minutes';
-
+```
 **Actions**:
 
 Kill problematic query if safe
@@ -165,6 +165,7 @@ Examine Jaeger traces for full call chain
 Check for lock contention:
 ```sql
 SELECT * FROM pg_locks WHERE granted = false;
+```
 
 
 #### Step 4: Communication & Resolution
