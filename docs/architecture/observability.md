@@ -120,9 +120,6 @@ Time: [TIMESTAMP]
 Dashboard: [GRAFANA_LINK]
 Runbook: [RUNBOOK_LINK]
 
-yaml
-Копировать код
-
 ---
 
 ## 6. Plan Response: Alert Scenario
