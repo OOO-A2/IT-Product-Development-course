@@ -8,7 +8,7 @@ from loguru import logger
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore")
     
-    DATABASE_URL: str = "sqlite:///./peerpilot.db"
+    DATABASE_URL: str = "sqlite:///./data/peerpilot.db"
 
     PROJECT_NAME: str = "Peer Pilot"
     APP_HOST: str = "0.0.0.0"
