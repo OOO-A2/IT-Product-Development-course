@@ -21,7 +21,7 @@ export default function InstructorGrading() {
     if (teamNameFromUrl) {
       // Find team by name (case insensitive)
       const team = teams.find(t =>
-        t.name.toLowerCase() === teamNameFromUrl.toLowerCase()
+        t.name.toLowerCase().replace(/\s+/g, '-') === teamNameFromUrl.toLowerCase()
       );
       return team ? team.id : 'all';
     }
@@ -170,12 +170,6 @@ export default function InstructorGrading() {
     alert('Grades saved successfully!');
   };
 
-
-  const handleExport = () => {
-    console.log('Exporting grades...');
-    alert('Export functionality would download CSV/Excel file');
-  };
-
   // Filter teams or get specific team students
   const displayData = selectedTeam === 'all'
     ? teams
@@ -265,12 +259,6 @@ export default function InstructorGrading() {
             </div>
 
             <div className="flex items-center space-x-3 mx-5">
-              <button onClick={handleExport}
-                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                <span>Export</span>
-              </button>
               <button onClick={handleSave} disabled={!unsavedChanges}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -351,7 +339,7 @@ export default function InstructorGrading() {
                               <div className="flex flex-col items-center">
                                 <span>{assignment}</span>
                                 <span className="text-xs font-normal text-gray-400 normal-case">
-                                  {assignment === 'ET' ? 'Extra' : assignmentNames[assignment]}
+                                  {assignment === 'TE' ? 'Extra' : assignmentNames[assignment]}
                                 </span>
                               </div>
                             </th>
@@ -381,7 +369,7 @@ export default function InstructorGrading() {
                         // Individual Extra Column
                         <th
                           key={`${sprint}-extra`}
-                          className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-200 bg-blue-50"
+                          className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-200"
                         >
                           <div className="flex flex-col items-center">
                             <span>Extra</span>
@@ -546,7 +534,7 @@ export default function InstructorGrading() {
                             // Individual Extra Column - editable per student
                             <td
                               key={`${sprint}-extra`}
-                              className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-100 bg-blue-50"
+                              className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-100"
                             >
                               {(() => {
                                 const cellId = `extra-${student.id}-${sprint}`;
