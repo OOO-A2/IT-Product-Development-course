@@ -47,13 +47,13 @@ export const mockGrades: Array<Grade> = [
     { studentId: 's1', sprint: 1, assignment: 'R', score: 90 },
     { studentId: 's1', sprint: 1, assignment: 'I', score: 88 },
     { studentId: 's1', sprint: 1, assignment: 'C', score: 92 },
-    { studentId: 's1', sprint: 1, assignment: 'ET', score: 50 },
+    { studentId: 's1', sprint: 1, assignment: 'TE', score: 50 },
     { studentId: 's1', sprint: 1, assignment: 'E', score: 1 },
     { studentId: 's2', sprint: 1, assignment: 'A', score: 85 },
     { studentId: 's2', sprint: 1, assignment: 'R', score: 90 },
     { studentId: 's2', sprint: 1, assignment: 'I', score: 88 },
     { studentId: 's2', sprint: 1, assignment: 'C', score: 92 },
-    { studentId: 's2', sprint: 1, assignment: 'ET', score: 50 },
+    { studentId: 's2', sprint: 1, assignment: 'TE', score: 50 },
     { studentId: 's2', sprint: 1, assignment: 'E', score: 5 },
     // Sprint 2
     { studentId: 's1', sprint: 2, assignment: 'A', score: 88 },
@@ -172,3 +172,184 @@ export const mockProjects: Array<Project> = [
         ]
     }
 ]
+
+
+export async function populateServerWithMockData() {
+  const BASE_URL = 'http://localhost:8000';
+  
+  try {
+    console.log('Starting to populate server with mock data...');
+    
+    // 1. First create teams
+    console.log('Creating teams...');
+    const teamIds = new Map(); // Store created team IDs
+    
+    for (const team of mockTeams) {
+      const teamData = {
+        name: team.name,
+        color: team.color
+        // Note: isLocked might be a server-side property or needs separate update
+      };
+      
+      const response = await fetch(`${BASE_URL}/teams/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json'
+        },
+        body: JSON.stringify(teamData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create team ${team.name}`);
+      }
+      
+      const createdTeam = await response.json();
+      teamIds.set(team.id, createdTeam.id);
+      console.log(`Created team: ${team.name} with ID: ${createdTeam.id}`);
+    }
+    
+    // 2. Create students and assign them to teams
+    console.log('Creating students...');
+    const studentIds = new Map();
+    
+    for (const student of mockStudents) {
+      const studentData = {
+        name: student.name,
+        email: student.email,
+        teamId: teamIds.get(student.teamId) || null
+      };
+      
+      const response = await fetch(`${BASE_URL}/students/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json'
+        },
+        body: JSON.stringify(studentData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create student ${student.name}`);
+      }
+      
+      const createdStudent = await response.json();
+      studentIds.set(student.id, createdStudent.id);
+      console.log(`Created student: ${student.name} with ID: ${createdStudent.id}`);
+    }
+    
+    // 3. Create grades for students
+    console.log('Creating grades...');
+    
+    for (const grade of mockGrades) {
+      const gradeData = {
+        studentId: studentIds.get(grade.studentId),
+        sprint: grade.sprint,
+        assignment: grade.assignment,
+        score: grade.score
+      };
+      
+      const response = await fetch(`${BASE_URL}/grades/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json'
+        },
+        body: JSON.stringify(gradeData)
+      });
+      
+      if (!response.ok) {
+        console.warn(`Failed to create grade for student ${grade.studentId}, sprint ${grade.sprint}, assignment ${grade.assignment}`);
+        // Continue with other grades even if one fails
+      }
+    }
+    
+    // 4. Create peer reviews
+    console.log('Creating peer reviews...');
+    
+    for (const review of [...reviewAssignments, ...mockReviews]) {
+      // Filter out duplicates based on ID
+      if (review.id === 'pr1' || review.id === 'pr2' || review.id === 'pr3') {
+        const reviewData = {
+          sprint: review.sprint,
+          reviewingTeamId: teamIds.get(review.reviewingTeamId),
+          reviewedTeamId: teamIds.get(review.reviewedTeamId),
+          status: review.status,
+          submittedAt: review.submittedAt ? review.submittedAt.toISOString() : null,
+          summaryPDFLink: review.summaryPDFLink || null,
+          commentsPDFLink: review.commentsPDFLink || null,
+          reviewedTeamReportLink: review.reviewedTeamReportLink || null,
+          suggestedGrades: review.suggestedGrades || null
+        };
+        
+        const response = await fetch(`${BASE_URL}/peer-reviews/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'accept': 'application/json'
+          },
+          body: JSON.stringify(reviewData)
+        });
+        
+        if (!response.ok) {
+          console.warn(`Failed to create peer review ${review.id}`);
+        } else {
+          console.log(`Created peer review for sprint ${review.sprint}`);
+        }
+      }
+    }
+    
+    // 5. Create projects (if endpoint exists)
+    console.log('Creating projects...');
+    
+    for (const project of mockProjects) {
+      const projectData = {
+        name: project.name,
+        maxTeams: project.maxTeams,
+        max_students_per_team: project.maxStudentsPerTeam
+        // Note: teams array might need to be created separately
+      };
+      
+      // Since projects endpoint isn't shown in the API, we'll attempt it
+      // but wrap in try-catch in case endpoint doesn't exist
+      try {
+        const response = await fetch(`${BASE_URL}/projects/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'accept': 'application/json'
+          },
+          body: JSON.stringify(projectData)
+        });
+        
+        if (response.ok) {
+          const createdProject = await response.json();
+          console.log(`Created project: ${project.name}`);
+          
+          // If project creation includes team assignment, you might need additional API calls
+          // to assign existing teams to this project
+        }
+      } catch (error) {
+        console.log('Projects endpoint might not be implemented yet');
+      }
+    }
+    
+    console.log('Server population completed successfully!');
+    console.log(`Created: ${teamIds.size} teams, ${studentIds.size} students, ${mockGrades.length} grades`);
+    
+    // Return mapping of original mock IDs to actual server IDs
+    return {
+      teamIdMapping: Object.fromEntries(teamIds),
+      studentIdMapping: Object.fromEntries(studentIds)
+    };
+    
+  } catch (error) {
+    console.error('Error populating server:', error);
+    throw error;
+  }
+}
+
+// Usage:
+// populateServerWithMockData()
+//   .then(mapping => console.log('Server populated with IDs:', mapping))
+//   .catch(error => console.error('Failed to populate server:', error));

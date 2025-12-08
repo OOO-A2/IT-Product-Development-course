@@ -7,6 +7,7 @@ export interface Student {
 }
 
 export interface Grade {
+  id?: string
   studentId: string
   sprint: number
   assignment: AssignmentLetter
@@ -48,11 +49,11 @@ export interface StudentDashboardProps {
   reviewAssignments: PeerReview[];
 }
 
-export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'ET' | 'E'
+export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'TE' | 'E'
 
 export type Assignments = Array<AssignmentLetter>
 
-export const assignments: Assignments = ['A', 'R', 'I', 'C', 'ET', 'E'];
+export const assignments: Assignments = ['A', 'R', 'I', 'C', 'TE', 'E'];
 
 export const assignmentNames = {
   A: 'Assignment',
