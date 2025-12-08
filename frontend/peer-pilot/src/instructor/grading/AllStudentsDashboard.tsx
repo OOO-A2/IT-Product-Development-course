@@ -146,18 +146,6 @@ export default function AllStudentsDashboard() {
       if (!response.ok) {
         throw new Error('Failed to save grades');
       }
-
-      const result: ApiResponse<null> = await response.json();
-      
-      if (result.success) {
-        setUnsavedChanges(false);
-        alert('Grades saved successfully!');
-        
-        // Optionally refresh data to ensure consistency
-        // await fetchData();
-      } else {
-        throw new Error(result.message || 'Failed to save grades');
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save grades');
       console.error('Error saving grades:', err);

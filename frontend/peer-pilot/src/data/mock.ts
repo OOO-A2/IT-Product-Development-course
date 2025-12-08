@@ -323,13 +323,13 @@ export async function populateServerWithMockData() {
         });
         
         if (response.ok) {
-          const createdProject = await response.json();
+          // const createdProject = await response.json();
           console.log(`Created project: ${project.name}`);
           
           // If project creation includes team assignment, you might need additional API calls
           // to assign existing teams to this project
         }
-      } catch (error) {
+      } catch {
         console.log('Projects endpoint might not be implemented yet');
       }
     }

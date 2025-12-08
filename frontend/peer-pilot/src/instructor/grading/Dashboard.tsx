@@ -699,7 +699,7 @@ export default function InstructorGrading() {
 
                         {/* Team Overall Average */}
                         <td className="px-6 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${getGradeColor500(overallAverage, 2000)}`}>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${getGradeColor500(overallAverage)}`}>
                             {overallAverage || '-'}
                           </span>
                         </td>
@@ -801,7 +801,7 @@ export default function InstructorGrading() {
 
                         {/* Student Overall Average */}
                         <td className="px-6 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold transition-all duration-200 transform hover:scale-105 ${getGradeColor500(overallSum, 2000)}`}>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold transition-all duration-200 transform hover:scale-105 ${getGradeColor500(overallSum)}`}>
                             {overallSum || '-'}
                           </span>
                         </td>

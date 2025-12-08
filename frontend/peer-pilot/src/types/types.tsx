@@ -60,7 +60,7 @@ export const assignmentNames = {
   R: 'Peer review',
   I: 'Implementation',
   C: 'Communication',
-  ET: 'Team extra', // For team grades
+  TE: 'Team extra', // For team grades
   E: 'Extra',
 };
 

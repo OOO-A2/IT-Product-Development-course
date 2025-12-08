@@ -1,16 +1,27 @@
-import { useState } from 'react';
-import { Users, Award, FileCheck, Menu, X } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Users, Award, FileCheck, Menu, X, RefreshCw, AlertCircle } from 'lucide-react';
 import TeamMembers from './TeamMembers.tsx';
 import MyGrades from './MyGrades';
 import ReviewAssignments from './ReviewAssignments';
-import type { PeerReview, StudentDashboardProps } from '../types/types.tsx';
+import type { Student, Team, Grade, PeerReview } from '../types/types.tsx';
+import { studentApi } from '../api/studentApi';
 
-export default function StudentDashboard({ student, teams, students, grades, reviewAssignments }: StudentDashboardProps) {
+interface StudentDashboardProps {
+  studentId: string;
+}
+
+export default function StudentDashboard({ studentId }: StudentDashboardProps) {
   const [activeTab, setActiveTab] = useState<'team' | 'grades' | 'reviews'>('grades');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const studentTeam = teams.find(team => team.id === student.teamId);
-  const teamStudents = students.filter(s => s.teamId === student.teamId);
+  // Data states
+  const [student, setStudent] = useState<Student | null>(null);
+  const [team, setTeam] = useState<Team | null>(null);
+  const [teamStudents, setTeamStudents] = useState<Student[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
+  const [peerReviews, setPeerReviews] = useState<PeerReview[]>([]);
 
   const tabs = [
     { id: 'grades' as const, name: 'My Grades', icon: Award },
@@ -18,17 +29,122 @@ export default function StudentDashboard({ student, teams, students, grades, rev
     { id: 'team' as const, name: 'Team Members', icon: Users },
   ];
 
-  const handleDeleteReview = (reviewId: string) => {
-    const reviewToDelete = reviewAssignments.find(r => r.id === reviewId);
+  // Fetch dashboard data
+  const fetchDashboardData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-    // Log the deletion for audit purposes
-    if (reviewToDelete) {
-      console.log(`Review deleted: Team ${reviewToDelete.reviewingTeamId} for Team ${reviewToDelete.reviewedTeamId}, 
-        Sprint ${reviewToDelete.sprint}`);
+    try {
+      // Fetch all necessary data in parallel
+      const [dashboardData, studentGrades] = await Promise.all([
+        studentApi.fetchStudentDashboard(studentId),
+        studentApi.fetchStudentGrades(studentId),
+      ]);
+
+      const team = dashboardData.teams.filter(t => t.id === dashboardData.student.teamId)[0];
+      const [peerReviewsData] = await Promise.all([team ? studentApi.fetchPeerReviews(team.id) : Promise.resolve([])]);
+
+      setStudent(dashboardData.student);
+      setTeam(team);
+      setTeamStudents(dashboardData.students);
+      setGrades(studentGrades);
+      setPeerReviews(peerReviewsData);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+      console.error('Error fetching dashboard data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [studentId]);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData, activeTab]);
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!window.confirm('Are you sure you want to delete this review?')) {
+      return;
+    }
+
+    try {
+      await studentApi.deletePeerReview(reviewId);
+
+      // Remove from local state
+      setPeerReviews(prev => prev.filter(review => review.id !== reviewId));
+
+      console.log(`Review ${reviewId} deleted successfully`);
+    } catch (err) {
+      alert('Failed to delete review. Please try again.');
+      console.error('Error deleting review:', err);
     }
   };
 
-  const onUpdateReview = (rId: string, u: Partial<PeerReview>) => console.log(rId + " " + u)
+  const handleUpdateReview = async (reviewId: string, updates: Partial<PeerReview>) => {
+    try {
+      const existingReview = peerReviews.find(r => r.id === reviewId);
+      if (!existingReview) {
+        throw new Error('Review not found');
+      }
+
+      const updatedReview = {
+        ...existingReview,
+        ...updates,
+      };
+
+      const result = await studentApi.submitPeerReview(updatedReview);
+
+      // Update local state
+      setPeerReviews(prev =>
+        prev.map(review => review.id === reviewId ? result : review)
+      );
+
+      console.log('Review updated successfully:', reviewId);
+      return result;
+    } catch (err) {
+      console.error('Error updating review:', err);
+      throw err;
+    }
+  };
+
+  // Handle refresh
+  const handleRefresh = () => {
+    fetchDashboardData();
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !student) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-sm p-8 max-w-md">
+          <div className="flex items-center justify-center mb-4">
+            <AlertCircle className="w-12 h-12 text-red-500" />
+          </div>
+          <div className="text-red-600 font-semibold mb-4">Error Loading Dashboard</div>
+          <p className="text-gray-600 mb-6">{error || 'Student data not found'}</p>
+          <button
+            onClick={fetchDashboardData}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -43,18 +159,29 @@ export default function StudentDashboard({ student, teams, students, grades, rev
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Student Dashboard</h1>
                 <p className="text-sm text-gray-500">
-                  Welcome back, {student.name} • {studentTeam?.name}
+                  Welcome back, {student.name} • {team?.name || 'No team assigned'}
                 </p>
               </div>
             </div>
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleRefresh}
+                className="hidden md:flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={isLoading}
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
+              </button>
+
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           {/* Navigation - Desktop */}
@@ -108,27 +235,27 @@ export default function StudentDashboard({ student, teams, students, grades, rev
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 'team' && (
+        {activeTab === 'team' && team && (
           <TeamMembers
-            team={studentTeam!}
+            team={team}
             students={teamStudents}
           />
         )}
 
-        {activeTab === 'grades' && (
+        {activeTab === 'grades' && student && (
           <MyGrades
             student={student}
             grades={grades}
           />
         )}
 
-        {activeTab === 'reviews' && (
+        {activeTab === 'reviews' && team && student && (
           <ReviewAssignments
             student={student}
-            team={studentTeam!}
-            reviewAssignments={reviewAssignments}
+            team={team}
+            reviewAssignments={peerReviews}
             onDeleteReview={handleDeleteReview}
-            onUpdateReview={onUpdateReview}
+            onUpdateReview={handleUpdateReview}
           />
         )}
       </div>
