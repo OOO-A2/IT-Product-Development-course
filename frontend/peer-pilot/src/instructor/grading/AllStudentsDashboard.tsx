@@ -3,7 +3,6 @@ import { Users, Mail, Calendar, TrendingUp, Save, Loader } from 'lucide-react';
 import { assignments, type AssignmentLetter, type Grade, type Student, type Team } from '../../types/types';
 import { getGradeColor100, getGradeColor500 } from '../../utils/utils';
 
-// API endpoints (adjust based on your backend)
 const API_BASE_URL = 'http://localhost:8000';
 const STUDENTS_ENDPOINT = `${API_BASE_URL}/students`;
 const TEAMS_ENDPOINT = `${API_BASE_URL}/teams`;

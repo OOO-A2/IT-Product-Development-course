@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Upload, FileText, Clock, CheckCircle, ExternalLink, Download, Trash2, AlertCircle, RefreshCw } from 'lucide-react';
 import type { Student, Team, PeerReview } from '../types/types.tsx';
+import { API_BASE_URL } from '../api/studentApi.ts';
 
 interface ReviewAssignmentsProps {
   student: Student;
   team: Team;
-  reviewAssignments: PeerReview[];
+  reviews: PeerReview[];
   onUpdateReview: (reviewId: string, updates: Partial<PeerReview>) => Promise<any>;
   onDeleteReview: (reviewId: string) => Promise<void>;
 }
 
-export default function ReviewAssignments({ team, reviewAssignments, onUpdateReview, onDeleteReview }: ReviewAssignmentsProps) {
+export default function ReviewAssignments({ team, reviews: reviews, onUpdateReview, onDeleteReview }: ReviewAssignmentsProps) {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [suggestedGrades, setSuggestedGrades] = useState<{ [key: string]: { iteration: number; assignment: number } }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -63,11 +64,29 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
     setUploadingId(reviewId);
 
     try {
-      // In a real implementation, you would upload the file to your server
-      // For now, we'll simulate an upload and create a fake link
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create FormData to send the file
+      const formData = new FormData();
+      formData.append('reviewId', reviewId);
+      formData.append('fileType', fileType);
+      formData.append('file', file);
 
-      const fakeDriveLink = `https://drive.google.com/file/d/${Math.random().toString(36).substr(2, 9)}/view`;
+      // Append suggested grades for summary upload
+      if (fileType === 'summary' && suggestedGrades[reviewId]) {
+        formData.append('suggestedGrades', JSON.stringify(suggestedGrades[reviewId]));
+      }
+
+      // Send the file to backend API
+      const response = await fetch(API_BASE_URL + '/reviews/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Upload failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
 
       const updates: Partial<PeerReview> = {
         status: 'submitted',
@@ -75,10 +94,10 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
       };
 
       if (fileType === 'summary') {
-        updates.summaryPDFLink = fakeDriveLink;
+        updates.summaryPDFLink = data.fileUrl; // URL from backend
         updates.suggestedGrades = suggestedGrades[reviewId];
       } else {
-        updates.commentsPDFLink = fakeDriveLink;
+        updates.commentsPDFLink = data.fileUrl; // URL from backend
       }
 
       // Call the parent component's update function
@@ -91,7 +110,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
         return newGrades;
       });
 
-      alert(`${fileType === 'summary' ? 'Review summary' : 'Comments'} submitted successfully!\nGoogle Drive link: ${fakeDriveLink}`);
+      alert(`${fileType === 'summary' ? 'Review summary' : 'Comments'} submitted successfully!\nFile uploaded to: ${data.fileUrl}`);
 
     } catch (error) {
       alert(`Failed to submit ${fileType}: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -180,35 +199,30 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
 
       {/* Review Assignments List */}
       <div className="space-y-4">
-        {reviewAssignments.map((assignment) => (
-          <div key={assignment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {reviews.map((review) => (
+          <div key={review.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  {getStatusIcon(assignment.status)}
+                  {getStatusIcon(review.status)}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                      Sprint {assignment.sprint} - Team Review
+                      Sprint {review.sprint} - Team Review
                     </h3>
-                    {assignment.reviewedTeamId && (
+                    {review.dueDate && (
                       <p className="text-sm text-gray-500">
-                        Reviewing: Team {assignment.reviewedTeamId}
-                      </p>
-                    )}
-                    {assignment.dueDate && (
-                      <p className="text-sm text-gray-500">
-                        Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                        Due: {new Date(review.dueDate).toLocaleDateString()}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(assignment.status)}`}>
-                    {getStatusText(assignment.status)}
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(review.status)}`}>
+                    {getStatusText(review.status)}
                   </span>
-                  {assignment.status === 'graded' && assignment.reviewGrade && (
+                  {review.status === 'graded' && review.reviewGrade && (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                      Grade: {assignment.reviewGrade}/100
+                      Grade: {review.reviewGrade}/100
                     </span>
                   )}
                 </div>
@@ -223,11 +237,11 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                       <strong>Your Team:</strong> {team.name}
                     </p>
                     <p className="text-sm text-gray-700">
-                      <strong>Reviewing Team:</strong> Team {assignment.reviewedTeamId || 'Unknown'}
+                      <strong>Reviewing Team:</strong> Team {review.reviewedTeamId || 'Unknown'}
                     </p>
-                    {assignment.reviewedTeamReportLink && (
+                    {review.reviewedTeamReportLink && (
                       <button
-                        onClick={() => downloadWorkToReview(assignment)}
+                        onClick={() => downloadWorkToReview(review)}
                         className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
                       >
                         <Download className="w-4 h-4" />
@@ -249,36 +263,36 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                         type="number"
                         min="0"
                         max="100"
-                        value={suggestedGrades[assignment.id]?.assignment ?? ''}
-                        onChange={(e) => handleGradeChange(assignment.id, 'assignment', Number(e.target.value))}
-                        disabled={assignment.status === 'submitted' || assignment.status === 'graded'}
+                        value={suggestedGrades[review.id]?.assignment ?? ''}
+                        onChange={(e) => handleGradeChange(review.id, 'assignment', Number(e.target.value))}
+                        disabled={review.status != 'pending'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
                         placeholder="0-100"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Iteration Grade (I)
+                        Iteration Grade (I) *
                       </label>
                       <input
                         type="number"
                         min="0"
                         max="100"
-                        value={suggestedGrades[assignment.id]?.iteration ?? ''}
-                        onChange={(e) => handleGradeChange(assignment.id, 'iteration', Number(e.target.value))}
-                        disabled={assignment.status === 'submitted' || assignment.status === 'graded'}
+                        value={suggestedGrades[review.id]?.iteration ?? ''}
+                        onChange={(e) => handleGradeChange(review.id, 'iteration', Number(e.target.value))}
+                        disabled={review.status != 'pending'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
                         placeholder="0-100 (optional)"
                       />
                     </div>
-                    {errors[assignment.id] && (
+                    {errors[review.id] && (
                       <div className="flex items-center space-x-2 text-sm text-red-600">
                         <AlertCircle className="w-4 h-4" />
-                        <span>{errors[assignment.id]}</span>
+                        <span>{errors[review.id]}</span>
                       </div>
                     )}
                     <p className="text-xs text-gray-500">
-                      * Assignment grade is required before submission
+                      * Grades are required before submission
                     </p>
                   </div>
                 </div>
@@ -288,7 +302,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                   {/* Comments Upload */}
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-2">Submit Report with Comments</h4>
-                    {assignment.commentsPDFLink ? (
+                    {review.commentsPDFLink ? (
                       <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">
@@ -296,12 +310,12 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                             <span className="text-sm font-medium text-green-800">Comments submitted</span>
                           </div>
                           <button
-                            onClick={() => handleDeleteReview(assignment.id)}
-                            disabled={isDeleting === assignment.id}
+                            onClick={() => handleDeleteReview(review.id)}
+                            disabled={isDeleting === review.id}
                             className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors disabled:opacity-50"
                             title="Delete review"
                           >
-                            {isDeleting === assignment.id ? (
+                            {isDeleting === review.id ? (
                               <RefreshCw className="w-4 h-4 animate-spin" />
                             ) : (
                               <Trash2 className="w-4 h-4" />
@@ -310,7 +324,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                         </div>
                         <div className="space-y-2">
                           <button
-                            onClick={() => window.open(assignment.commentsPDFLink!, '_blank')}
+                            onClick={() => window.open(review.commentsPDFLink!, '_blank')}
                             className="flex items-center space-x-2 text-sm text-green-700 hover:text-green-800 transition-colors"
                           >
                             <FileText className="w-4 h-4" />
@@ -329,26 +343,26 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
 
                           <input
                             type="file"
-                            id={`file-comments-upload-${assignment.id}`}
+                            id={`file-comments-upload-${review.id}`}
                             accept=".pdf"
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                handleFileUpload(assignment.id, 'comments', file);
+                                handleFileUpload(review.id, 'comments', file);
                               }
                             }}
                             className="hidden"
-                            disabled={uploadingId === assignment.id}
+                            disabled={uploadingId === review.id}
                           />
 
                           <label
-                            htmlFor={`file-comments-upload-${assignment.id}`}
-                            className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${uploadingId === assignment.id
+                            htmlFor={`file-comments-upload-${review.id}`}
+                            className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${uploadingId === review.id
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
                               }`}
                           >
-                            {uploadingId === assignment.id ? (
+                            {uploadingId === review.id ? (
                               <>
                                 <RefreshCw className="w-4 h-4 animate-spin" />
                                 <span>Uploading...</span>
@@ -372,7 +386,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                   {/* Summary Upload */}
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-2">Submit Review Summary</h4>
-                    {assignment.summaryPDFLink ? (
+                    {review.summaryPDFLink ? (
                       <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">
@@ -380,12 +394,12 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                             <span className="text-sm font-medium text-green-800">Summary submitted</span>
                           </div>
                           <button
-                            onClick={() => handleDeleteReview(assignment.id)}
-                            disabled={isDeleting === assignment.id}
+                            onClick={() => handleDeleteReview(review.id)}
+                            disabled={isDeleting === review.id}
                             className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors disabled:opacity-50"
                             title="Delete review"
                           >
-                            {isDeleting === assignment.id ? (
+                            {isDeleting === review.id ? (
                               <RefreshCw className="w-4 h-4 animate-spin" />
                             ) : (
                               <Trash2 className="w-4 h-4" />
@@ -394,19 +408,19 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                         </div>
                         <div className="space-y-2">
                           <button
-                            onClick={() => window.open(assignment.summaryPDFLink!, '_blank')}
+                            onClick={() => window.open(review.summaryPDFLink!, '_blank')}
                             className="flex items-center space-x-2 text-sm text-green-700 hover:text-green-800 transition-colors"
                           >
                             <FileText className="w-4 h-4" />
                             <span>View summary PDF</span>
                             <ExternalLink className="w-3 h-3" />
                           </button>
-                          {assignment.suggestedGrades && (
+                          {review.suggestedGrades && (
                             <div className="text-sm text-gray-600 pt-2 border-t border-green-200">
                               <p><strong>Suggested Grades:</strong></p>
-                              <p>Assignment: {assignment.suggestedGrades.assignment}/100</p>
-                              {assignment.suggestedGrades.iteration !== undefined && (
-                                <p>Iteration: {assignment.suggestedGrades.iteration}/100</p>
+                              <p>Assignment: {review.suggestedGrades.assignment}/100</p>
+                              {review.suggestedGrades.iteration !== undefined && (
+                                <p>Iteration: {review.suggestedGrades.iteration}/100</p>
                               )}
                             </div>
                           )}
@@ -422,26 +436,26 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
 
                           <input
                             type="file"
-                            id={`file-upload-${assignment.id}`}
+                            id={`file-upload-${review.id}`}
                             accept=".pdf"
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                handleFileUpload(assignment.id, 'summary', file);
+                                handleFileUpload(review.id, 'summary', file);
                               }
                             }}
                             className="hidden"
-                            disabled={uploadingId === assignment.id}
+                            disabled={uploadingId === review.id || !suggestedGrades[review.id]?.assignment || !suggestedGrades[review.id]?.iteration}
                           />
 
                           <label
-                            htmlFor={`file-upload-${assignment.id}`}
-                            className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${uploadingId === assignment.id || !suggestedGrades[assignment.id]?.assignment
+                            htmlFor={`file-upload-${review.id}`}
+                            className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${uploadingId === review.id || !suggestedGrades[review.id]?.assignment || !suggestedGrades[review.id]?.iteration
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
                               }`}
                           >
-                            {uploadingId === assignment.id ? (
+                            {uploadingId === review.id ? (
                               <>
                                 <RefreshCw className="w-4 h-4 animate-spin" />
                                 <span>Uploading...</span>
@@ -457,7 +471,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
                           <p className="text-xs text-gray-500 mt-2">
                             Max file size: 10MB • PDF format only
                           </p>
-                          {!suggestedGrades[assignment.id]?.assignment && (
+                          {(!suggestedGrades[review.id]?.assignment || !suggestedGrades[review.id]?.iteration) && (
                             <p className="text-xs text-red-500 mt-1">
                               Please provide assignment grade first
                             </p>
@@ -473,7 +487,7 @@ export default function ReviewAssignments({ team, reviewAssignments, onUpdateRev
         ))}
       </div>
 
-      {reviewAssignments.length === 0 && (
+      {reviews.length === 0 && (
         <div className="text-center py-12 bg-white rounded-xl shadow-sm">
           <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-500">No review assignments at this time</p>

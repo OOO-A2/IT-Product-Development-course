@@ -253,7 +253,7 @@ export default function StudentDashboard({ studentId }: StudentDashboardProps) {
           <ReviewAssignments
             student={student}
             team={team}
-            reviewAssignments={peerReviews}
+            reviews={peerReviews}
             onDeleteReview={handleDeleteReview}
             onUpdateReview={handleUpdateReview}
           />
