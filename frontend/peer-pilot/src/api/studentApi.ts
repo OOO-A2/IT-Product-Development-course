@@ -31,10 +31,37 @@ export const studentApi = {
     return response.json();
   },
 
+  async uploadFile(reviewId: string, fileType: 'comments' | 'summary', file: File, suggestedGrades: {[key: string]: { iteration: number; assignment: number }}): Promise<{fileUrl: string}> {
+    const formData = new FormData();
+    formData.append('reviewId', reviewId);
+    formData.append('fileType', fileType);
+    formData.append('file', file);
+
+    // Append suggested grades for summary upload
+    if (fileType === 'summary' && suggestedGrades[reviewId]) {
+      formData.append('suggestedGrades', JSON.stringify(suggestedGrades[reviewId]));
+    }
+
+    // Send the file to backend API
+    const response = await fetch(API_BASE_URL + '/reviews/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `Upload failed with status ${response.status}`);
+    }
+
+    return await response.json();
+  },
+
+
+
   // Create/update a peer review
   async submitPeerReview(reviewData: any): Promise<any> {
     const method = reviewData.id ? 'PUT' : 'POST';
-    const url = reviewData.id 
+    const url = reviewData.id
       ? `${API_BASE_URL}/peer-reviews/${reviewData.id}`
       : `${API_BASE_URL}/peer-reviews/`;
 

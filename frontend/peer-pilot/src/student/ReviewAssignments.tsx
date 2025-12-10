@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Upload, FileText, Clock, CheckCircle, ExternalLink, Trash2, AlertCircle, RefreshCw } from 'lucide-react';
 import type { Student, Team, PeerReview } from '../types/types.tsx';
-import { API_BASE_URL } from '../api/studentApi.ts';
 import { getStatusColor, getStatusText } from '../utils/utils.ts';
+import { studentApi } from '../api/studentApi.ts';
 
 interface ReviewAssignmentsProps {
   student: Student;
@@ -66,28 +66,8 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
 
     try {
       // Create FormData to send the file
-      const formData = new FormData();
-      formData.append('reviewId', reviewId);
-      formData.append('fileType', fileType);
-      formData.append('file', file);
-
-      // Append suggested grades for summary upload
-      if (fileType === 'summary' && suggestedGrades[reviewId]) {
-        formData.append('suggestedGrades', JSON.stringify(suggestedGrades[reviewId]));
-      }
-
-      // Send the file to backend API
-      const response = await fetch(API_BASE_URL + '/reviews/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Upload failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
+      
+      const data = await studentApi.uploadFile(reviewId, fileType, file, suggestedGrades)
 
       const updates: Partial<PeerReview> = {
         status: 'submitted',

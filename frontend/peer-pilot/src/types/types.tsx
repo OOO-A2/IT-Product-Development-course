@@ -89,3 +89,24 @@ export interface Project {
   maxStudentsPerTeam: number;
   teams: Team[];
 }
+
+// API Service Types
+export interface ApiPeerReview extends PeerReview {
+  reviewingTeam: Team;
+  reviewedTeam: Team;
+}
+
+export interface GradeUpdate {
+  teamId: string;
+  sprint: number;
+  assignment: AssignmentLetter;
+  score: number;
+}
+
+export interface ReportLinkUpdate {
+  reviewingTeamId: string;
+  reviewedTeamId: string;
+  sprint: number;
+  reportLink: string;
+}
+

@@ -4,51 +4,8 @@ import { assignmentNames, assignments, type AssignmentLetter, type Grade, type S
 import TeamFilter from './TeamFilter';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getGradeColor100, getGradeColor500 } from '../../utils/utils';
+import { apiService } from '../../api/instructorApi';
 
-// API Service functions
-const API_BASE_URL = 'http://localhost:8000'; // Adjust based on your backend
-
-const apiService = {
-  // Fetch all teams
-  async fetchTeams(): Promise<Team[]> {
-    const response = await fetch(`${API_BASE_URL}/teams`);
-    if (!response.ok) throw new Error('Failed to fetch teams');
-    const result: Team[] = await response.json();
-    return result;
-  },
-
-  // Fetch all students
-  async fetchStudents(): Promise<Student[]> {
-    const response = await fetch(`${API_BASE_URL}/students`);
-    if (!response.ok) throw new Error('Failed to fetch students');
-    const result: Student[] = await response.json();
-    return result;
-  },
-
-  // Fetch grades
-  async fetchGrades(): Promise<Grade[]> {
-    const response = await fetch(`${API_BASE_URL}/grades`);
-    if (!response.ok) throw new Error('Failed to fetch grades');
-    const result: Grade[] = await response.json();
-    return result;
-  },
-
-  // Save grades (batch update)
-  async saveGrades(grades: Grade[]): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/grades`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(grades),
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to save grades');
-    }
-  },
-};
 
 export default function InstructorGrading() {
   // State for data from backend
