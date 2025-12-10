@@ -143,14 +143,6 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
     }
   };
 
-  const downloadWorkToReview = (assignment: PeerReview) => {
-    if (assignment.reviewedTeamReportLink) {
-      window.open(assignment.reviewedTeamReportLink, '_blank');
-    } else {
-      alert(`No work available to download for Team ${assignment.reviewedTeamId || 'unknown'}`);
-    }
-  };
-
   const getStatusIcon = (status: PeerReview['status']) => {
     switch (status) {
       case 'submitted':
@@ -183,6 +175,15 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
         return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-yellow-100 text-yellow-800';
+    }
+  };
+
+  const viewWorkToReview = (assignment: PeerReview) => {
+    if (assignment.reviewedTeamReportLink) {
+      // Open Google Drive link in a new tab
+      window.open(assignment.reviewedTeamReportLink, '_blank', 'noopener,noreferrer');
+    } else {
+      alert(`No work available to view for Team ${assignment.reviewedTeamId || 'unknown'}`);
     }
   };
 
@@ -241,11 +242,11 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
                     </p>
                     {review.reviewedTeamReportLink && (
                       <button
-                        onClick={() => downloadWorkToReview(review)}
+                        onClick={() => viewWorkToReview(review)}
                         className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 transition-colors"
                       >
-                        <Download className="w-4 h-4" />
-                        <span>Download Work to Review</span>
+                        <ExternalLink className="w-4 h-4" />
+                        <span>View Work to Review</span>
                       </button>
                     )}
                   </div>
