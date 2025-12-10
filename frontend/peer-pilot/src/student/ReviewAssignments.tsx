@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Upload, FileText, Clock, CheckCircle, ExternalLink, Download, Trash2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Upload, FileText, Clock, CheckCircle, ExternalLink, Trash2, AlertCircle, RefreshCw } from 'lucide-react';
 import type { Student, Team, PeerReview } from '../types/types.tsx';
 import { API_BASE_URL } from '../api/studentApi.ts';
+import { getStatusColor, getStatusText } from '../utils/utils.ts';
 
 interface ReviewAssignmentsProps {
   student: Student;
@@ -151,30 +152,6 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
         return <CheckCircle className="w-5 h-5 text-blue-500" />;
       default:
         return <Clock className="w-5 h-5 text-yellow-500" />;
-    }
-  };
-
-  const getStatusText = (status: PeerReview['status']) => {
-    switch (status) {
-      case 'submitted':
-        return 'Submitted';
-      case 'graded':
-        return 'Graded';
-      case 'pending':
-        return 'Pending';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  const getStatusColor = (status: PeerReview['status']) => {
-    switch (status) {
-      case 'submitted':
-        return 'bg-green-100 text-green-800';
-      case 'graded':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
     }
   };
 
