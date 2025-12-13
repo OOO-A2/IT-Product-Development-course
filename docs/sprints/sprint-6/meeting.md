@@ -1,3 +1,10 @@
+---
+layout: default
+nav_order: 1
+parent: "Sprint 6"
+title: "Meeting"
+---
+
 ## Meeting date: 12.12.2025
 
 ## Action points:
