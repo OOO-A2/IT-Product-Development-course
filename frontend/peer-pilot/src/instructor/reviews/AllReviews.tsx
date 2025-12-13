@@ -417,7 +417,7 @@ export default function InstructorPeerReview() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Download Review Documents & Suggested Grades
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" colSpan={4}>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" colSpan={5}>
                     Reviewing Team Grades
                   </th>
                 </tr>
