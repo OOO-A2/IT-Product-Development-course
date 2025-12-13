@@ -7,6 +7,7 @@ export interface Student {
 }
 
 export interface Grade {
+  id?: string
   studentId: string
   sprint: number
   assignment: AssignmentLetter
@@ -48,18 +49,18 @@ export interface StudentDashboardProps {
   reviewAssignments: PeerReview[];
 }
 
-export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'ET' | 'E'
+export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'TE' | 'E'
 
 export type Assignments = Array<AssignmentLetter>
 
-export const assignments: Assignments = ['A', 'R', 'I', 'C', 'ET', 'E'];
+export const assignments: Assignments = ['A', 'R', 'I', 'C', 'TE', 'E'];
 
 export const assignmentNames = {
   A: 'Assignment',
   R: 'Peer review',
   I: 'Implementation',
   C: 'Communication',
-  ET: 'Team extra', // For team grades
+  TE: 'Team extra', // For team grades
   E: 'Extra',
 };
 
@@ -88,3 +89,24 @@ export interface Project {
   maxStudentsPerTeam: number;
   teams: Team[];
 }
+
+// API Service Types
+export interface ApiPeerReview extends PeerReview {
+  reviewingTeam: Team;
+  reviewedTeam: Team;
+}
+
+export interface GradeUpdate {
+  teamId: string;
+  sprint: number;
+  assignment: AssignmentLetter;
+  score: number;
+}
+
+export interface ReportLinkUpdate {
+  reviewingTeamId: string;
+  reviewedTeamId: string;
+  sprint: number;
+  reportLink: string;
+}
+

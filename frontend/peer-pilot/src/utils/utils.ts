@@ -1,3 +1,6 @@
+
+import type { PeerReview } from "../types/types";
+
 export function getGradeColor500(grade: number) {
     return grade >= 400 ? 'bg-green-100 text-green-800' :
         grade >= 350 ? 'bg-blue-100 text-blue-800' :
@@ -16,3 +19,28 @@ export function getGradeColor100(grade: number) {
                         'bg-gray-100 text-gray-800 hover:bg-gray-200'
 
 }
+
+
+export const getStatusText = (status: PeerReview['status']) => {
+    switch (status) {
+        case 'submitted':
+            return 'Submitted';
+        case 'graded':
+            return 'Graded';
+        case 'pending':
+            return 'Pending';
+        default:
+            return 'Unknown';
+    }
+};
+
+export const getStatusColor = (status: PeerReview['status']) => {
+    switch (status) {
+        case 'submitted':
+            return 'bg-green-100 text-green-800';
+        case 'graded':
+            return 'bg-blue-100 text-blue-800';
+        default:
+            return 'bg-yellow-100 text-yellow-800';
+    }
+};

@@ -1,4 +1,3 @@
-import { mockGrades, mockStudent, mockStudents, mockTeams, reviewAssignments } from "./data/mock";
 import AllReviews from "./instructor/reviews/AllReviews";
 import Dashboard from "./instructor/grading/Dashboard";
 import StudentDashboard from "./student/StudentDashboard";
@@ -81,12 +80,8 @@ function App() {
                 <Routes>
                   <Route index element={
                     <StudentDashboard
-                      student={mockStudent}
-                      teams={mockTeams}
-                      students={mockStudents}
-                      grades={mockGrades}
-                      reviewAssignments={reviewAssignments} />} />
-                  <Route path="teams" element={<TeamManagement role="student" />} />    
+                      studentId={'1'}/>} />
+                  <Route path="teams" element={<TeamManagement role="student" />} />
                   <Route path="*" element={<Navigate to="/student" replace />} />
                 </Routes>
               </Layout>

@@ -1,164 +1,306 @@
-import { useEffect, useState } from 'react';
-import { Search, Save, Calendar, ExternalLink, FileText, Clock, Edit, Check, X, Download } from 'lucide-react';
-import { type Grade, type Student, type Team, type PeerReview, assignments, assignmentNames, type AssignmentLetter } from '../../types/types';
-import { mockGrades, mockReviews, mockStudents, mockTeams } from '../../data/mock';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { Search, Save, Calendar, ExternalLink, FileText, Clock, Edit, Check, X, Download, RefreshCw } from 'lucide-react';
+import { type Grade, type Student, type Team, type PeerReview, assignments, assignmentNames, type AssignmentLetter, type ApiPeerReview, type ReportLinkUpdate } from '../../types/types';
 import { getGradeColor100 } from '../../utils/utils';
+import { useSearchParams } from 'react-router-dom';
+import { apiService } from '../../api/instructorApi';
+
+interface ReviewWithTeams extends PeerReview {
+  reviewingTeam: Team;
+  reviewedTeam: Team;
+}
 
 export default function InstructorPeerReview() {
-  // Mock data
-  const [teams] = useState<Team[]>(mockTeams);
-  const [peerReviews, setPeerReviews] = useState<PeerReview[]>(mockReviews);
-  const [grades, setGrades] = useState<Grade[]>(mockGrades);
-  const [students] = useState<Student[]>(mockStudents);
+  // State for data from backend
+  const [students, setStudents] = useState<Student[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
+  const [peerReviews, setPeerReviews] = useState<ReviewWithTeams[]>([]);
 
+  // UI state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Local editing state
   const [searchQuery, setSearchQuery] = useState('');
   const [editingGrades, setEditingGrades] = useState<{ [key: string]: boolean }>({});
   const [editingReportLinks, setEditingReportLinks] = useState<{ [key: string]: boolean }>({});
   const [reportLinks, setReportLinks] = useState<{ [key: string]: string }>({});
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+
+  // Track changes for batch saving
+  const [pendingGradeUpdates, setPendingGradeUpdates] = useState<Grade[]>([]);
+  const [pendingReportLinkUpdates, setPendingReportLinkUpdates] = useState<ReportLinkUpdate[]>([]);
+
+  // URL state for sprint filtering
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedSprint, setSelectedSprint] = useState<number>(() => {
     return Number(searchParams.get('sprint')) || 1;
   });
 
-  // Update URL when team selection changes
+  // Update URL when sprint changes
   useEffect(() => {
+    const newParams = new URLSearchParams(searchParams);
+
     if (selectedSprint === 1) {
-      searchParams.delete('sprint');
+      newParams.delete('sprint');
     } else {
-      searchParams.set('sprint', String(selectedSprint));
+      newParams.set('sprint', String(selectedSprint));
     }
-    setSearchParams(searchParams);
-  }, [selectedSprint, searchParams, setSearchParams]);
+
+    setSearchParams(newParams, { replace: true });
+  }, [selectedSprint, setSearchParams, searchParams]);
 
   const sprints = [1, 2, 3, 4, 5];
 
-  // Get peer reviews for current sprint
-  const currentSprintReviews = peerReviews.filter(review => review.sprint === selectedSprint);
+  // Fetch all data
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-  // Get team grade for a specific assignment type
-  const getTeamAssignmentGrade = (teamId: string, sprint: number, assignment: string): number => {
+    try {
+      // Fetch all data in parallel
+      const [teamsData, studentsData, gradesData, reviewsData] = await Promise.all([
+        apiService.fetchTeams(),
+        apiService.fetchStudents(),
+        apiService.fetchGrades(),
+        apiService.getPeerReviews(selectedSprint),
+      ]);
+
+      setStudents(studentsData || []);
+      setGrades(gradesData || []);
+
+      // Add teams to review by team ids
+      reviewsData.forEach(r => {
+        r.reviewingTeam = teamsData.find(t => t.id === r.reviewingTeamId) as Team
+        r.reviewedTeam = teamsData.find(t => t.id === r.reviewedTeamId) as Team
+      })
+
+      setPeerReviews(reviewsData || []);
+
+      // Initialize report links from existing data
+      const initialReportLinks: { [key: string]: string } = {};
+      reviewsData.forEach((review: ApiPeerReview) => {
+        if (review.assignedWork) {
+          // Extract link from assigned work description
+          const match = review.assignedWork.match(/https?:\/\/[^\s]+/);
+          if (match) {
+            const key = `${review.reviewedTeamId}-${selectedSprint}`;
+            initialReportLinks[key] = match[0];
+          }
+        }
+      });
+      setReportLinks(initialReportLinks);
+
+      // Reset pending changes
+      setPendingGradeUpdates([]);
+      setPendingReportLinkUpdates([]);
+      setUnsavedChanges(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
+      console.error('Error fetching data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedSprint]);
+
+  // Fetch data when sprint changes
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Calculate team average for an assignment
+  const getTeamAssignmentGrade = (teamId: string, assignment: AssignmentLetter): number => {
+    if (assignment === 'E') return 0;
+
     const teamStudents = students.filter(student => student.teamId === teamId);
     if (teamStudents.length === 0) return 0;
 
-    const teamGrades = teamStudents.map(student =>
-      grades.find(g => g.studentId === student.id && g.sprint === sprint && g.assignment === assignment)?.score ?? 0
-    );
+    const teamGrades = teamStudents.map(student => {
+      const grade = grades.find(
+        g => g.studentId === student.id && g.sprint === selectedSprint && g.assignment === assignment
+      );
+      return grade?.score || 0;
+    });
 
-    return Math.round(teamGrades.reduce((acc, score) => acc + score, 0) / teamGrades.length);
+    const average = teamGrades.reduce((acc, score) => acc + score, 0) / teamGrades.length;
+    return Math.round(average);
   };
 
   // Update team assignment grade
-  const updateTeamAssignmentGrade = (teamId: string, sprint: number, assignment: AssignmentLetter, score: number) => {
+  const updateTeamAssignmentGrade = (teamId: string, assignment: AssignmentLetter, score: number) => {
     const validScore = Math.max(0, Math.min(100, score));
     const teamStudents = students.filter(student => student.teamId === teamId);
 
-    setGrades(prev => {
-      const updated = [...prev];
+    const updatedGrades: Grade[] = teamStudents.map(student => {
+      const existingGrade = grades.find(
+        g => g.studentId === student.id &&
+          g.sprint === selectedSprint &&
+          g.assignment === assignment
+      );
 
-      teamStudents.forEach(student => {
-        const existingIndex = updated.findIndex(
-          g => g.studentId === student.id && g.sprint === sprint && g.assignment === assignment
+      return {
+        studentId: student.id,
+        sprint: selectedSprint,
+        assignment,
+        score: validScore,
+        ...(existingGrade?.id && { id: existingGrade.id }),
+      };
+    });
+
+    // Update local state
+    setGrades(prev => {
+      const newGrades = [...prev];
+      updatedGrades.forEach(updatedGrade => {
+        const existingIndex = newGrades.findIndex(
+          g => g.studentId === updatedGrade.studentId &&
+            g.sprint === updatedGrade.sprint &&
+            g.assignment === updatedGrade.assignment
         );
 
         if (existingIndex >= 0) {
-          updated[existingIndex] = { ...updated[existingIndex], score: validScore };
+          newGrades[existingIndex] = updatedGrade;
         } else {
-          updated.push({ studentId: student.id, sprint, assignment, score: validScore });
+          newGrades.push(updatedGrade);
         }
       });
+      return newGrades;
+    });
 
-      return updated;
+    // Track pending updates (remove duplicates)
+    setPendingGradeUpdates(prev => {
+      const newUpdates = prev.filter(
+        g => !(g.sprint === selectedSprint && g.assignment === assignment)
+      );
+      return [...newUpdates, ...updatedGrades];
     });
 
     setUnsavedChanges(true);
   };
 
-  const updateReportLink = (reviewedTeamId: string, sprint: number, link: string) => {
-    setReportLinks(prev => ({
-      ...prev,
-      [`${reviewedTeamId}-${sprint}`]: link
-    }));
+  // Update report link
+  const updateReportLink = (reviewingTeamId: string, reviewedTeamId: string, link: string) => {
+    const key = `${reviewedTeamId}-${selectedSprint}`;
+    setReportLinks(prev => ({ ...prev, [key]: link }));
 
-    // Update the peer review with the assigned work description
-    const reviewToUpdate = peerReviews.find(review =>
-      review.reviewedTeamId === reviewedTeamId && review.sprint === sprint
-    );
+    const update: ReportLinkUpdate = {
+      reviewingTeamId,
+      reviewedTeamId,
+      sprint: selectedSprint,
+      reportLink: link
+    };
 
-    if (reviewToUpdate) {
-      setPeerReviews(prev => prev.map(review =>
-        review.id === reviewToUpdate.id
-          ? { ...review, assignedWork: link ? `Review assignment report: ${link}` : undefined }
-          : review
-      ));
-    }
+    // Track pending updates
+    setPendingReportLinkUpdates(prev => {
+      const existingIndex = prev.findIndex(
+        u => u.reviewingTeamId === reviewingTeamId &&
+          u.reviewedTeamId === reviewedTeamId &&
+          u.sprint === selectedSprint
+      );
 
-    setUnsavedChanges(true);
-  };
-
-  const handleSave = () => {
-    console.log('Saving peer reviews and grades:', { peerReviews, grades, reportLinks });
-    setUnsavedChanges(false);
-    alert('Peer review data saved successfully!');
-  };
-
-  const downloadReview = (reviewLink: string) => {
-    window.open(reviewLink, '_blank');
-  };
-
-  // Download detailed review with comments (mock function)
-  const downloadDetailedReview = (reviewId: string) => {
-    const review = peerReviews.find(r => r.id === reviewId);
-    if (review) {
-      const fakeDetailedReviewLink = `https://drive.google.com/file/d/detailed-${reviewId}/view`;
-      window.open(fakeDetailedReviewLink, '_blank');
-      alert(`Downloading detailed review with comments for ${review.reviewingTeamId}`);
-    }
-  };
-
-  // Download all files for current sprint
-  const downloadAllFiles = () => {
-    const filesToDownload = currentSprintReviews.flatMap(review => {
-      const files = [];
-
-      if (review.summaryPDFLink) {
-        files.push({
-          name: `summary-review-${review.reviewingTeamId}-sprint-${selectedSprint}.pdf`,
-          url: review.summaryPDFLink
-        });
+      if (existingIndex >= 0) {
+        const newUpdates = [...prev];
+        newUpdates[existingIndex] = update;
+        return newUpdates;
       }
-
-      // Add detailed review (mock)
-      files.push({
-        name: `detailed-review-${review.reviewingTeamId}-sprint-${selectedSprint}.pdf`,
-        url: `https://drive.google.com/file/d/detailed-${review.id}/view`
-      });
-
-      return files;
+      return [...prev, update];
     });
 
-    // Simulate batch download
-    console.log('Downloading all files:', filesToDownload);
-    alert(`Preparing to download ${filesToDownload.length} files for Sprint ${selectedSprint}`);
+    setUnsavedChanges(true);
+  };
 
-    // In real implementation, this would trigger batch download
-    filesToDownload.forEach(file => {
-      window.open(file.url, '_blank');
+  // Save all changes
+  const handleSave = async () => {
+    if (pendingGradeUpdates.length === 0 && pendingReportLinkUpdates.length === 0) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      await apiService.saveChanges(pendingGradeUpdates, pendingReportLinkUpdates);
+
+      // Clear pending changes
+      setPendingGradeUpdates([]);
+      setPendingReportLinkUpdates([]);
+      setUnsavedChanges(false);
+
+      // Refresh data to ensure consistency
+      await fetchData();
+
+      alert('Changes saved successfully!');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save changes';
+      setError(errorMessage);
+      alert(`Error saving changes: ${errorMessage}`);
+      console.error('Error saving changes:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Download review PDF
+  const handleDownloadPdf = async (reviewId: string, type: 'summary' | 'detailed') => {
+    try {
+      await apiService.downloadReviewPdf(reviewId, type);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to download PDF';
+      alert(`Error downloading PDF: ${errorMessage}`);
+      console.error('Error downloading PDF:', err);
+    }
+  };
+
+  // Download all files for sprint
+  const handleDownloadAllFiles = async () => {
+    try {
+      await apiService.downloadAllFiles(selectedSprint);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to download files';
+      alert(`Error downloading files: ${errorMessage}`);
+      console.error('Error downloading files:', err);
+    }
+  };
+
+  // Filter reviews based on search query
+  const filteredReviews = peerReviews
+    .filter(review => {
+      return review.reviewingTeam?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        review.reviewedTeam?.name.toLowerCase().includes(searchQuery.toLowerCase());
     });
+
+  // Get report link for a reviewed team
+  const getReportLink = (reviewedTeamId: string): string => {
+    return reportLinks[`${reviewedTeamId}-${selectedSprint}`] || '';
   };
 
-  const filteredReviews = currentSprintReviews.filter(review => {
-    const reviewingTeam = teams.find(t => t.id === review.reviewingTeamId);
-    const reviewedTeam = teams.find(t => t.id === review.reviewedTeamId);
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading peer reviews...</p>
+        </div>
+      </div>
+    );
+  }
 
-    return reviewingTeam?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      reviewedTeam?.name.toLowerCase().includes(searchQuery.toLowerCase());
-  });
-
-  const getReportLink = (reviewedTeamId: string, sprint: number): string => {
-    return reportLinks[`${reviewedTeamId}-${sprint}`] || '';
-  };
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-sm p-8 max-w-md">
+          <div className="text-red-600 font-semibold mb-4">Error Loading Data</div>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={fetchData}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -178,22 +320,39 @@ export default function InstructorPeerReview() {
 
             <div className="flex items-center space-x-3">
               <button
-                onClick={downloadAllFiles}
+                onClick={fetchData}
+                className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={loading}
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
+              </button>
+
+              <button
+                onClick={handleDownloadAllFiles}
                 className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Download className="w-4 h-4" />
                 <span>Download All Sprint Files</span>
               </button>
+
               <button
                 onClick={handleSave}
-                disabled={!unsavedChanges}
+                disabled={!unsavedChanges || isSaving}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Save className="w-4 h-4" />
-                <span>Save Changes</span>
+                {isSaving ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
               </button>
+
               {unsavedChanges && (
-                <span className="text-sm text-orange-600 font-medium">Unsaved changes</span>
+                <span className="text-orange-600 font-medium">
+                  {pendingGradeUpdates.length + pendingReportLinkUpdates.length} unsaved change{(pendingGradeUpdates.length + pendingReportLinkUpdates.length) !== 1 ? 's' : ''}
+                </span>
               )}
             </div>
           </div>
@@ -233,8 +392,8 @@ export default function InstructorPeerReview() {
             {/* Status Summary */}
             <div className="bg-gray-50 rounded-lg p-3">
               <div className="text-sm text-gray-600">
-                <span className="font-medium">{currentSprintReviews.filter(r => r.status === 'submitted').length}</span> of{' '}
-                <span className="font-medium">{currentSprintReviews.length}</span> reviews submitted
+                <span className="font-medium">{peerReviews.filter(r => r.status === 'submitted').length}</span> of{' '}
+                <span className="font-medium">{peerReviews.length}</span> reviews submitted
               </div>
             </div>
           </div>
@@ -265,19 +424,17 @@ export default function InstructorPeerReview() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredReviews.map(review => {
-                  const reviewingTeam = teams.find(t => t.id === review.reviewingTeamId);
-                  const reviewedTeam = teams.find(t => t.id === review.reviewedTeamId);
                   const isEditingReportLink = editingReportLinks[review.id];
-                  const currentReportLink = getReportLink(review.reviewedTeamId, selectedSprint);
+                  const currentReportLink = getReportLink(review.reviewedTeamId);
 
                   return (
                     <tr key={review.id} className="hover:bg-gray-50 transition-colors">
                       {/* Reviewing Team */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className={`w-3 h-3 rounded-full ${reviewingTeam?.color} mr-3`}></div>
+                          <div className={`w-3 h-3 rounded-full ${review.reviewingTeam.color} mr-3`}></div>
                           <div>
-                            <div className="text-sm font-medium text-gray-900">{reviewingTeam?.name}</div>
+                            <div className="text-sm font-medium text-gray-900">{review.reviewingTeam.name}</div>
                             <div className="text-sm text-gray-500">
                               {students.filter(s => s.teamId === review.reviewingTeamId).length} members
                             </div>
@@ -288,9 +445,9 @@ export default function InstructorPeerReview() {
                       {/* Reviewed Team */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className={`w-3 h-3 rounded-full ${reviewedTeam?.color} mr-3`}></div>
+                          <div className={`w-3 h-3 rounded-full ${review.reviewedTeam.color} mr-3`}></div>
                           <div>
-                            <div className="text-sm font-medium text-gray-900">{reviewedTeam?.name}</div>
+                            <div className="text-sm font-medium text-gray-900">{review.reviewedTeam.name}</div>
                             <div className="text-sm text-gray-500">
                               {students.filter(s => s.teamId === review.reviewedTeamId).length} members
                             </div>
@@ -306,7 +463,7 @@ export default function InstructorPeerReview() {
                               <input
                                 type="text"
                                 value={currentReportLink}
-                                onChange={(e) => updateReportLink(review.reviewedTeamId, selectedSprint, e.target.value)}
+                                onChange={(e) => updateReportLink(review.reviewingTeamId, review.reviewedTeamId, e.target.value)}
                                 placeholder="https://drive.google.com/..."
                                 className="flex-1 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
                               />
@@ -319,10 +476,7 @@ export default function InstructorPeerReview() {
                               <button
                                 onClick={() => {
                                   setEditingReportLinks(prev => ({ ...prev, [review.id]: false }));
-                                  setReportLinks(prev => ({
-                                    ...prev,
-                                    [`${review.reviewedTeamId}-${selectedSprint}`]: ''
-                                  }));
+                                  updateReportLink(review.reviewingTeamId, review.reviewedTeamId, '');
                                 }}
                                 className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors"
                               >
@@ -372,22 +526,22 @@ export default function InstructorPeerReview() {
                                   <FileText className="w-4 h-4 text-green-600" />
                                   <div className="flex items-center space-x-4">
                                     <button
-                                      onClick={() => downloadReview(review.summaryPDFLink!)}
+                                      onClick={() => handleDownloadPdf(review.id, 'summary')}
                                       className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
                                     >
-                                      <span>Summary Review</span>
-                                      <ExternalLink className="w-3 h-3" />
+                                      <span>Summary Review (PDF)</span>
+                                      <Download className="w-3 h-3" />
                                     </button>
                                     <button
-                                      onClick={() => downloadDetailedReview(review.id)}
+                                      onClick={() => handleDownloadPdf(review.id, 'detailed')}
                                       className="flex items-center space-x-1 text-sm text-purple-600 hover:text-purple-800 transition-colors"
                                     >
-                                      <span>Review with Comments</span>
+                                      <span>Review with Comments (PDF)</span>
                                       <Download className="w-3 h-3" />
                                     </button>
                                   </div>
                                   <div className="text-xs text-gray-500">
-                                    {review.submittedAt?.toLocaleDateString()}
+                                    {review.submittedAt ? new Date(review.submittedAt).toLocaleDateString() : 'Not submitted'}
                                   </div>
                                 </>
                               ) : (
@@ -418,27 +572,30 @@ export default function InstructorPeerReview() {
                         </div>
                       </td>
 
-                      {/* Team Grades - All 5 assignment types */}
-                      {assignments.map(assignment => {
-                        if (assignment === 'E') return
-                        const currentGrade = getTeamAssignmentGrade(review.reviewingTeamId, selectedSprint, assignment);
-                        const isEditing = editingGrades[`${review.id}-${assignment}`];
+                      {/* Team Grades - A, R, I, C (excluding E) */}
+                      {assignments.filter(assignment => assignment !== 'E').map(assignment => {
+                        const currentGrade = getTeamAssignmentGrade(review.reviewingTeamId, assignment);
+                        const cellId = `${review.id}-${assignment}`;
+                        const isEditing = editingGrades[cellId];
 
                         return (
-                          <td key={`${review.id}-${assignment}`} className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-100">
+                          <td key={cellId} className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-100">
                             <div className="flex flex-col items-center space-y-1">
                               <div className="text-xs font-medium text-gray-500">
                                 {assignmentNames[assignment]}
                               </div>
                               {isEditing ? (
                                 <div className="flex items-center space-x-1">
-                                  <input type="number" min="0" max="100"
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
                                     value={currentGrade}
-                                    onChange={(e) => updateTeamAssignmentGrade(review.reviewingTeamId, selectedSprint, assignment, Number(e.target.value))}
-                                    onBlur={() => setEditingGrades(prev => ({ ...prev, [`${review.id}-${assignment}`]: false }))}
+                                    onChange={(e) => updateTeamAssignmentGrade(review.reviewingTeamId, assignment, Number(e.target.value))}
+                                    onBlur={() => setEditingGrades(prev => ({ ...prev, [cellId]: false }))}
                                     onKeyDown={(e) => {
                                       if (e.key === 'Enter' || e.key === 'Escape') {
-                                        setEditingGrades(prev => ({ ...prev, [`${review.id}-${assignment}`]: false }));
+                                        setEditingGrades(prev => ({ ...prev, [cellId]: false }));
                                       }
                                     }}
                                     autoFocus
@@ -447,7 +604,7 @@ export default function InstructorPeerReview() {
                                 </div>
                               ) : (
                                 <button
-                                  onClick={() => setEditingGrades(prev => ({ ...prev, [`${review.id}-${assignment}`]: true }))}
+                                  onClick={() => setEditingGrades(prev => ({ ...prev, [cellId]: true }))}
                                   className={`w-16 px-2 py-1 rounded font-medium transition-colors text-sm ${getGradeColor100(currentGrade)}`}
                                 >
                                   {currentGrade || '-'}

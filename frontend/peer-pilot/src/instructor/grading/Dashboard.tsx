@@ -1,31 +1,35 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download, Save, Calendar, Award, Users, ExternalLink } from 'lucide-react';
+import { Save, Calendar, Award, Users, ExternalLink, RefreshCw } from 'lucide-react';
 import { assignmentNames, assignments, type AssignmentLetter, type Grade, type Student, type Team } from '../../types/types';
 import TeamFilter from './TeamFilter';
-import { mockGrades, mockStudents, mockTeams } from '../../data/mock';
 import { Link, useSearchParams } from 'react-router-dom';
 import { getGradeColor100, getGradeColor500 } from '../../utils/utils';
+import { apiService } from '../../api/instructorApi';
+
 
 export default function InstructorGrading() {
-  // Mock data
-  const [teams] = useState<Team[]>(mockTeams);
-  const [students] = useState<Student[]>(mockStudents);
-  const [grades, setGrades] = useState<Grade[]>(mockGrades);
-
+  // State for data from backend
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [grades, setGrades] = useState<Grade[]>([]);
+  
+  // State for pending changes
+  const [pendingGradeUpdates, setPendingGradeUpdates] = useState<Grade[]>([]);
+  
+  // UI state
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Search params for URL state
   const [searchParams, setSearchParams] = useSearchParams();
+  
   // Initialize selectedTeam from URL
   const [selectedTeam, setSelectedTeam] = useState<string>(() => {
     const teamNameFromUrl = searchParams.get('team');
-    if (teamNameFromUrl) {
-      // Find team by name (case insensitive)
-      const team = teams.find(t =>
-        t.name.toLowerCase() === teamNameFromUrl.toLowerCase()
-      );
-      return team ? team.id : 'all';
-    }
-    return 'all';
+    return teamNameFromUrl || 'all';
   });
 
   // Update URL with team name
@@ -35,20 +39,49 @@ export default function InstructorGrading() {
     if (selectedTeam === 'all') {
       newParams.delete('team');
     } else {
-      const team = teams.find(t => t.id === selectedTeam);
-      if (team) {
-        newParams.set('team', team.name.toLowerCase().replace(/\s+/g, '-'));
-      }
+      newParams.set('team', selectedTeam);
     }
 
     setSearchParams(newParams, { replace: true });
-  }, [selectedTeam, teams, setSearchParams, searchParams]);
+  }, [selectedTeam, setSearchParams, searchParams]);
+
+  // Fetch initial data
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch all data in parallel
+        let [teamsData, studentsData, gradesData] = await Promise.all([
+          apiService.fetchTeams(),
+          apiService.fetchStudents(),
+          apiService.fetchGrades(),
+        ]);
+
+        teamsData = !teamsData ? [] : teamsData
+        studentsData = !studentsData ? [] : studentsData
+        gradesData = !gradesData ? [] : gradesData
+        
+        setTeams(teamsData);
+        setStudents(studentsData);
+        setGrades(gradesData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+        console.error('Error fetching data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const sprints = [1, 2, 3, 4];
 
   // Calculate team averages for assignments
   const getTeamAssignmentGrade = (teamId: string, sprint: number, assignment: AssignmentLetter): number => {
-    if (assignment === 'E') return 0
+    if (assignment === 'E') return 0;
     const teamStudents = students.filter(s => s.teamId === teamId);
     if (teamStudents.length === 0) return 0;
 
@@ -59,7 +92,7 @@ export default function InstructorGrading() {
     return Math.round(teamGrades.reduce((acc, score) => acc + score, 0) / teamGrades.length);
   };
 
-  // Get individual student grade (for extra grades in team view)
+  // Get individual student grade
   const getStudentGrade = (studentId: string, sprint: number, assignment: AssignmentLetter): number => {
     const grade = grades.find(
       g => g.studentId === studentId && g.sprint === sprint && g.assignment === assignment
@@ -68,35 +101,75 @@ export default function InstructorGrading() {
   };
 
   // Update team assignment grade (applies to all team members)
-  const updateTeamAssignmentGrade = (teamId: string, sprint: number, assignment: AssignmentLetter, score: number) => {
+  const updateTeamAssignmentGrade = async (teamId: string, sprint: number, assignment: AssignmentLetter, score: number) => {
     const validScore = Math.max(0, Math.min(100, score));
     const teamStudents = students.filter(s => s.teamId === teamId);
 
-    setGrades(prev => {
-      const updated = [...prev];
+    const updatedGrades: Grade[] = [];
 
-      teamStudents.forEach(student => {
-        const existingIndex = updated.findIndex(
-          g => g.studentId === student.id && g.sprint === sprint && g.assignment === assignment
+    teamStudents.forEach(student => {
+      const existingGrade = grades.find(
+        g => g.studentId === student.id && g.sprint === sprint && g.assignment === assignment
+      );
+
+      const updatedGrade: Grade = {
+        studentId: student.id,
+        sprint,
+        assignment,
+        score: validScore,
+        ...(existingGrade && { id: existingGrade.id }), // Include ID if exists for update
+      };
+
+      updatedGrades.push(updatedGrade);
+    });
+
+    // Update local state immediately for UI responsiveness
+    setGrades(prev => {
+      const newGrades = [...prev];
+      
+      updatedGrades.forEach(updatedGrade => {
+        const existingIndex = newGrades.findIndex(
+          g => g.studentId === updatedGrade.studentId && 
+               g.sprint === updatedGrade.sprint && 
+               g.assignment === updatedGrade.assignment
         );
 
         if (existingIndex >= 0) {
-          updated[existingIndex] = { ...updated[existingIndex], score: validScore };
+          newGrades[existingIndex] = updatedGrade;
         } else {
-          updated.push({ studentId: student.id, sprint, assignment, score: validScore });
+          newGrades.push(updatedGrade);
         }
       });
 
-      return updated;
+      return newGrades;
     });
 
+    // Track pending updates
+    setPendingGradeUpdates(prev => [...prev, ...updatedGrades]);
     setUnsavedChanges(true);
   };
 
-  // Update individual student grade (for extra grades)
+  // Update individual student grade
   const updateStudentGrade = (studentId: string, sprint: number, assignment: AssignmentLetter, score: number) => {
     const validScore = Math.max(0, Math.min(100, score));
 
+    const updatedGrade: Grade = {
+      studentId,
+      sprint,
+      assignment,
+      score: validScore,
+    };
+
+    // Find existing grade for ID
+    const existingGrade = grades.find(
+      g => g.studentId === studentId && g.sprint === sprint && g.assignment === assignment
+    );
+    
+    if (existingGrade?.id) {
+      updatedGrade.id = existingGrade.id;
+    }
+
+    // Update local state
     setGrades(prev => {
       const existingIndex = prev.findIndex(
         g => g.studentId === studentId && g.sprint === sprint && g.assignment === assignment
@@ -104,13 +177,15 @@ export default function InstructorGrading() {
 
       if (existingIndex >= 0) {
         const updated = [...prev];
-        updated[existingIndex] = { ...updated[existingIndex], score: validScore };
+        updated[existingIndex] = updatedGrade;
         return updated;
       } else {
-        return [...prev, { studentId, sprint, assignment, score: validScore }];
+        return [...prev, updatedGrade];
       }
     });
 
+    // Track pending updates
+    setPendingGradeUpdates(prev => [...prev, updatedGrade]);
     setUnsavedChanges(true);
   };
 
@@ -122,7 +197,7 @@ export default function InstructorGrading() {
     return sum;
   };
 
-  // Calculate student sprint sum (for extra grades)
+  // Calculate student sprint sum
   const calculateStudentSprintSum = (studentId: string, sprint: number): number => {
     const scores = assignments.map(a => getStudentGrade(studentId, sprint, a));
     return scores.reduce((acc, score) => acc + score, 0);
@@ -146,12 +221,11 @@ export default function InstructorGrading() {
       : 0;
   };
 
-  // Calculate team total grade (A + R + I + C + ET)
+  // Calculate team total grade
   const calculateTeamTotalGrade = (teamId: string, sprint: number): number => {
     const teamStudents = students.filter(s => s.teamId === teamId);
     if (teamStudents.length === 0) return 0;
 
-    // Get average team grade among students for each assignment
     const assignmentTotals = assignments.map(assignment => {
       const assignmentScores = teamStudents.map(student =>
         assignment === 'E' ? 0 : getStudentGrade(student.id, sprint, assignment)
@@ -159,31 +233,73 @@ export default function InstructorGrading() {
       return assignmentScores.reduce((acc, score) => acc + score, 0) / assignmentScores.length;
     });
 
-    // Sum all assignment averages
     return Math.round(assignmentTotals.reduce((acc, avg) => acc + avg, 0));
   };
 
+  // Save changes to backend
+  const handleSave = async () => {
+    if (pendingGradeUpdates.length === 0) return;
 
-  const handleSave = () => {
-    // Send grades to backend
-    setUnsavedChanges(false);
-    alert('Grades saved successfully!');
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      // Send all pending updates to backend
+      await apiService.saveGrades(pendingGradeUpdates);
+      
+      // Clear pending updates
+      setPendingGradeUpdates([]);
+      setUnsavedChanges(false);
+      
+      // Optional: Refresh data from server to ensure consistency
+      const updatedGrades = await apiService.fetchGrades();
+      setGrades(updatedGrades);
+      
+      // Show success message
+      alert('Grades saved successfully!');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save grades';
+      setError(errorMessage);
+      alert(`Error saving grades: ${errorMessage}`);
+      console.error('Error saving grades:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-
-  const handleExport = () => {
-    console.log('Exporting grades...');
-    alert('Export functionality would download CSV/Excel file');
+  // Refresh data from server
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const [teamsData, studentsData, gradesData] = await Promise.all([
+        apiService.fetchTeams(),
+        apiService.fetchStudents(),
+        apiService.fetchGrades(),
+      ]);
+      
+      setTeams(teamsData);
+      setStudents(studentsData);
+      setGrades(gradesData);
+      setPendingGradeUpdates([]);
+      setUnsavedChanges(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to refresh data');
+      console.error('Error refreshing data:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Filter teams or get specific team students
   const displayData = selectedTeam === 'all'
     ? teams
-    : students.filter(student => student.teamId === selectedTeam);
+    : students.filter(student => student.teamId == selectedTeam);
 
   const isTeamView = selectedTeam === 'all';
 
-  // Scroll persistance
+  // Scroll persistence
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
   // Save scroll position
@@ -203,7 +319,6 @@ export default function InstructorGrading() {
     if (saved && tableContainerRef.current) {
       const { scrollLeft } = JSON.parse(saved);
 
-      // Use setTimeout to ensure DOM is ready
       setTimeout(() => {
         if (tableContainerRef.current) {
           tableContainerRef.current.scrollLeft = scrollLeft;
@@ -220,13 +335,12 @@ export default function InstructorGrading() {
     let scrollTimeout: number;
 
     const handleScroll = () => {
-      // Throttle scroll events
       clearTimeout(scrollTimeout);
       scrollTimeout = window.setTimeout(saveScrollPosition, 100);
     };
 
     tableContainer.addEventListener('scroll', handleScroll);
-    restoreScrollPosition(); // Restore on mount
+    restoreScrollPosition();
 
     return () => {
       tableContainer.removeEventListener('scroll', handleScroll);
@@ -236,7 +350,11 @@ export default function InstructorGrading() {
 
   // Save on page unload
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (unsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+      }
       saveScrollPosition();
     };
 
@@ -244,14 +362,44 @@ export default function InstructorGrading() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, []);
+  }, [unsavedChanges]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-xl shadow-sm p-8 max-w-md">
+          <div className="text-red-600 font-semibold mb-4">Error Loading Data</div>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={handleRefresh}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-left">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                 <Award className="w-6 h-6 text-white" />
@@ -264,20 +412,34 @@ export default function InstructorGrading() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-3 mx-5">
-              <button onClick={handleExport}
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleRefresh}
                 className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={isLoading}
               >
-                <Download className="w-4 h-4" />
-                <span>Export</span>
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span>Refresh</span>
               </button>
-              <button onClick={handleSave} disabled={!unsavedChanges}
+              
+              <button
+                onClick={handleSave}
+                disabled={!unsavedChanges || isSaving}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Save className="w-4 h-4" />
-                <span>Save Changes</span>
+                {isSaving ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
               </button>
-              {unsavedChanges && (<span className="text text-orange-600 font-medium">Unsaved changes</span>)}
+              
+              {unsavedChanges && (
+                <span className="text-orange-600 font-medium">
+                  {pendingGradeUpdates.length} unsaved change{pendingGradeUpdates.length !== 1 ? 's' : ''}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -287,15 +449,26 @@ export default function InstructorGrading() {
       <div className="px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <TeamFilter teams={teams} selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} />
+            <TeamFilter 
+              teams={teams} 
+              selectedTeam={selectedTeam} 
+              setSelectedTeam={setSelectedTeam} 
+            />
+            <div className="text-sm text-gray-500">
+              {isTeamView ? (
+                <span>Showing {teams.length} team{teams.length !== 1 ? 's' : ''}</span>
+              ) : (
+                <span>Showing {displayData.length} student{displayData.length !== 1 ? 's' : ''} from selected team</span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Grading Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div ref={tableContainerRef} className="overflow-x-auto">
+          <div ref={tableContainerRef} className="overflow-x-auto max-h-[70vh]">
             <table className="w-full min-w-max">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                 <tr>
                   {/* Team/Student Column */}
                   <th className="py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20 border-r"
@@ -342,7 +515,7 @@ export default function InstructorGrading() {
                       // Team View: A, R, I, C, Sum
                       return [
                         ...assignments
-                          .filter(assignment => assignment !== 'E') // Exclude individual extra in team view
+                          .filter(assignment => assignment !== 'E')
                           .map(assignment => (
                             <th
                               key={`${sprint}-${assignment}`}
@@ -351,7 +524,7 @@ export default function InstructorGrading() {
                               <div className="flex flex-col items-center">
                                 <span>{assignment}</span>
                                 <span className="text-xs font-normal text-gray-400 normal-case">
-                                  {assignment === 'ET' ? 'Extra' : assignmentNames[assignment]}
+                                  {assignment === 'TE' ? 'Extra' : assignmentNames[assignment]}
                                 </span>
                               </div>
                             </th>
@@ -364,9 +537,8 @@ export default function InstructorGrading() {
                         </th>
                       ];
                     } else {
-                      // Individual Student View: Assignments (Total), Extra, Sum
+                      // Individual Student View
                       return [
-                        // Assignments Total Column (A + R + I + C + Team Extra)
                         <th
                           key={`${sprint}-assignments-total`}
                           className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-200 first:border-l-0"
@@ -378,10 +550,9 @@ export default function InstructorGrading() {
                             </span>
                           </div>
                         </th>,
-                        // Individual Extra Column
                         <th
                           key={`${sprint}-extra`}
-                          className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-200 bg-blue-50"
+                          className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-200"
                         >
                           <div className="flex flex-col items-center">
                             <span>Extra</span>
@@ -390,7 +561,6 @@ export default function InstructorGrading() {
                             </span>
                           </div>
                         </th>,
-                        // Sum Column (Total + Individual Extra)
                         <th
                           key={`${sprint}-sum`}
                           className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-l border-gray-200 bg-gray-100"
@@ -406,7 +576,7 @@ export default function InstructorGrading() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {displayData.map((item) => {
                   if (isTeamView) {
-                    // Team View - show team averages
+                    // Team View
                     const team = item as Team;
                     const teamStudents = students.filter(s => s.teamId === team.id);
                     const overallAverage = calculateTeamOverallAverage(team.id);
@@ -416,8 +586,10 @@ export default function InstructorGrading() {
                         {/* Team Info */}
                         <td className="px-1 py-4 text-center whitespace-nowrap sticky left-0 bg-white z-10 border-r">
                           <div className="flex flex-col items-center space-y-1">
-                            <button className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${team.color} transform hover:scale-105 hover:text-black transition-transform duration-200`}
-                              onClick={() => setSelectedTeam(team.id)}>
+                            <button
+                              onClick={() => setSelectedTeam(team.id)}
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${team.color} transform hover:scale-105 hover:text-black transition-transform duration-200`}
+                            >
                               {team.name}
                             </button>
                             <div className="flex items-center space-x-1 text-xs text-gray-500">
@@ -433,7 +605,7 @@ export default function InstructorGrading() {
 
                           return [
                             ...assignments.map(assignment => {
-                              if (assignment === 'E') return
+                              if (assignment === 'E') return null;
                               const cellId = `team-${team.id}-${sprint}-${assignment}`;
                               const score = getTeamAssignmentGrade(team.id, sprint, assignment);
                               const isEditing = editingCell === cellId;
@@ -469,7 +641,7 @@ export default function InstructorGrading() {
                                   )}
                                 </td>
                               );
-                            }),
+                            }).filter(Boolean),
                             // Team Sprint Sum
                             <td
                               key={`${sprint}-sum`}
@@ -484,19 +656,14 @@ export default function InstructorGrading() {
 
                         {/* Team Overall Average */}
                         <td className="px-6 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${overallAverage >= 1080 ? 'bg-green-100 text-green-800' :
-                            overallAverage >= 960 ? 'bg-blue-100 text-blue-800' :
-                              overallAverage >= 840 ? 'bg-yellow-100 text-yellow-800' :
-                                overallAverage >= 720 ? 'bg-orange-100 text-orange-800' :
-                                  'bg-gray-100 text-gray-800 border border-gray-300'
-                            }`}>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${getGradeColor500(overallAverage)}`}>
                             {overallAverage || '-'}
                           </span>
                         </td>
                       </tr>
                     );
                   } else {
-                    // Team Members View - show individual students with team assignments total + individual extra grades
+                    // Team Members View
                     const student = item as Student;
                     const team = teams.find(t => t.id === student.teamId);
                     const overallSum = calculateStudentSum(student.id);
@@ -510,26 +677,24 @@ export default function InstructorGrading() {
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-gray-900">{student.name}</span>
                             <span className="text-xs text-gray-500">{student.email}</span>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white ${team?.color} mt-1`}>
+                            <span className={`inline-flex items-center  max-w-[150px] px-2 py-0.5 rounded-full text-xs font-medium text-white ${team?.color} mt-1`}>
                               {team?.name}
                             </span>
                           </div>
                         </td>
 
-                        {/* Student Grades (Team total + individual extra grades) */}
+                        {/* Student Grades */}
                         {sprints.flatMap(sprint => {
                           const teamTotal = calculateTeamTotalGrade(team?.id || '', sprint);
                           const individualExtra = getStudentGrade(student.id, sprint, 'E');
                           const sprintSum = teamTotal + individualExtra;
 
                           return [
-                            // Team Total Column (A + R + I + C + ET) - same for all team members
                             <td
                               key={`${sprint}-team-total`}
                               className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-100"
                             >
                               {studentIndex === 0 ? (
-                                // Only show team total in first student's row, span other rows
                                 <button
                                   disabled
                                   className={`w-16 px-2 py-1 rounded font-medium transition-all duration-200 transform hover:scale-105 text-sm ${getGradeColor500(teamTotal)}`}
@@ -538,22 +703,24 @@ export default function InstructorGrading() {
                                   {teamTotal || '-'}
                                 </button>
                               ) : (
-                                // Empty cell for other students - team total is shown in first row
                                 <span className="text-gray-300">-</span>
                               )}
                             </td>,
 
-                            // Individual Extra Column - editable per student
                             <td
                               key={`${sprint}-extra`}
-                              className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-100 bg-blue-50"
+                              className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-100"
                             >
                               {(() => {
                                 const cellId = `extra-${student.id}-${sprint}`;
                                 const isEditing = editingCell === cellId;
 
                                 return isEditing ? (
-                                  <input type="number" min="0" max="100" value={individualExtra}
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={individualExtra}
                                     onChange={(e) => updateStudentGrade(student.id, sprint, 'E', Number(e.target.value))}
                                     onBlur={() => setEditingCell(null)}
                                     onKeyDown={(e) => {
@@ -575,19 +742,13 @@ export default function InstructorGrading() {
                               })()}
                             </td>,
 
-                            // Sum Column (Team Total + Individual Extra)
                             <td
                               key={`${sprint}-sum`}
                               className="px-3 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50"
                             >
                               <button
                                 disabled
-                                className={`inline-flex items-center px-3 py-1 rounded text-sm font-semibold transition-all duration-200 transform hover:scale-105 ${sprintSum >= 450 ? 'bg-green-100 text-green-800' :
-                                  sprintSum >= 400 ? 'bg-blue-100 text-blue-800' :
-                                    sprintSum >= 350 ? 'bg-yellow-100 text-yellow-800' :
-                                      sprintSum >= 300 ? 'bg-orange-100 text-orange-800' :
-                                        'bg-gray-100 text-gray-800'
-                                  }`}
+                                className={`inline-flex items-center px-3 py-1 rounded text-sm font-semibold transition-all duration-200 transform hover:scale-105 ${getGradeColor500(sprintSum)}`}
                               >
                                 {sprintSum || '-'}
                               </button>
@@ -597,12 +758,7 @@ export default function InstructorGrading() {
 
                         {/* Student Overall Average */}
                         <td className="px-6 py-4 whitespace-nowrap text-center border-l border-gray-200 bg-gray-50">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold transition-all duration-200 transform hover:scale-105 ${overallSum >= 1350 ? 'bg-green-100 text-green-800' :
-                            overallSum >= 1200 ? 'bg-blue-100 text-blue-800' :
-                              overallSum >= 1050 ? 'bg-yellow-100 text-yellow-800' :
-                                overallSum >= 900 ? 'bg-orange-100 text-orange-800' :
-                                  'bg-gray-100 text-gray-800 border border-gray-300'
-                            }`}>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold transition-all duration-200 transform hover:scale-105 ${getGradeColor500(overallSum)}`}>
                             {overallSum || '-'}
                           </span>
                         </td>
