@@ -295,7 +295,7 @@ export default function InstructorGrading() {
   // Filter teams or get specific team students
   const displayData = selectedTeam === 'all'
     ? teams
-    : students.filter(student => student.teamId === selectedTeam);
+    : students.filter(student => student.teamId == selectedTeam);
 
   const isTeamView = selectedTeam === 'all';
 
@@ -677,7 +677,7 @@ export default function InstructorGrading() {
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-gray-900">{student.name}</span>
                             <span className="text-xs text-gray-500">{student.email}</span>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white ${team?.color} mt-1`}>
+                            <span className={`inline-flex items-center  max-w-[150px] px-2 py-0.5 rounded-full text-xs font-medium text-white ${team?.color} mt-1`}>
                               {team?.name}
                             </span>
                           </div>
