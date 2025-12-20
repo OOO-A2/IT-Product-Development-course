@@ -3,11 +3,15 @@ FROM node AS builder
 
 WORKDIR /app
 
-# Copy source code
-COPY . .
+# Copy package files separately for better caching
+COPY package*.json ./
+COPY package-lock.json ./
 
-# Install dependencies
+# Install dependencies (this layer will be cached if package files don't change)
 RUN npm ci
+
+# Copy source code (this happens after dependency installation)
+COPY . .
 
 # Build the app
 RUN npm run build
