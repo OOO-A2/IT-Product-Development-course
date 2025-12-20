@@ -1,15 +1,49 @@
-// src/components/MyComponent.test.tsx
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import Dashboard from './Dashboard';
+import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
+
 
 describe('Renders extra column on the teams view of instructors dashboard', () => {
-    it('should display "Extra" column header in the main grades table', () => {
-        render(<Dashboard/>);
+    beforeEach(() => {
+        vi.clearAllMocks();
 
-        const extraHeader = screen.getAllByText('Extra')[0];
-        expect(extraHeader).toBeInTheDocument();
+        const localStorageMock = {
+            getItem: vi.fn(),
+            setItem: vi.fn(),
+            removeItem: vi.fn(),
+            clear: vi.fn(),
+        }
 
-        const table = screen.getByRole('table');
-        expect(within(table).getAllByText('Extra').length).toBeGreaterThan(0);
+        Object.defineProperty(window, 'localStorage', {
+            value: localStorageMock,
+        });
+
+        // Mock localStorage.getItem to return the scroll data
+        localStorageMock.getItem.mockImplementation((key: string) => {
+            if (key === 'tableScroll') {
+                return JSON.stringify({
+                    scrollLeft: 0,
+                    scrollTop: 0,
+                });
+            }
+            return null;
+        });
+    });
+
+    it('show Try Again Button on no backend connection', async () => {
+        render(
+            <BrowserRouter>
+                <Dashboard />
+            </BrowserRouter>);
+        screen.debug()
+
+        await waitFor(() => {
+            const extraHeader = screen.getByText('Try Again');
+            expect(extraHeader).toBeInTheDocument();
+
+            const button = screen.getByRole('button');
+            expect(within(button).getAllByText('Try Again').length).toBeGreaterThan(0);
+        }, {timeout: 2000})
     });
 });

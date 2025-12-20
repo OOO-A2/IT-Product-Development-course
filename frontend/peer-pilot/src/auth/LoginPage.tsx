@@ -1,27 +1,48 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import type { User } from '../types/types';
+import { mockUsers } from '../data/mock';
 
-export default function LoginPage() {
+interface LoginProps {
+  onLogin: (user: User) => void;
+}
+
+export default function LoginPage({ onLogin }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
     if (!email || !password) return;
-    
+    e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Login attempt:', { email, password });
-    setIsLoading(false);
+    setError('');
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock authentication - replace with real auth
+      const user = mockUsers.find(u => u.email === email && u.email.split('@')[0] === password);
+      
+      if (user) {
+        onLogin(user);
+      } else {
+        setError('Invalid credentials. Use "instructor" or "student" as password for demo.');
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.');
+      console.log(`Error: ${err}`)
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSubmit();
+      handleSubmit(e);
     }
   };
 
@@ -41,6 +62,22 @@ export default function LoginPage() {
 
           {/* Form */}
           <div className="space-y-5">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Demo Credentials */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials:</h3>
+              <div className="text-xs text-blue-700 space-y-1">
+                <p><strong>Instructor:</strong> denis@innopolis.ru / denis</p>
+                <p><strong>Student:</strong> arsen@innopolis.university / arsen</p>
+              </div>
+            </div>
+
+
             {/* Email Input */}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-gray-700 block">
@@ -93,7 +130,7 @@ export default function LoginPage() {
               {isLoading ? (
                 <span className="flex items-center justify-center space-x-2">
                   <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />

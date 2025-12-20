@@ -26,3 +26,6 @@ nav_order: 10
 1. Sprint 3:
     - To structure and organize the interview questions. It helped us focus on analyzing the content rather than on manual tasks.
     - To transcribe the audio recordings, which saved time and improved accuracy compared to manual transcription.
+1. Sprint 4:
+     - To structure acceptance criteria for Tasks
+     - To orginize and grammar check the text in observability and analytics file

@@ -3,9 +3,11 @@ export interface Student {
   name: string
   email: string
   teamId: string
+  isRep?: boolean
 }
 
 export interface Grade {
+  id?: string
   studentId: string
   sprint: number
   assignment: AssignmentLetter
@@ -15,7 +17,9 @@ export interface Grade {
 export interface Team {
   id: string
   name: string
-  color: string
+  color?: string
+  students: Student[]
+  isLocked: boolean // Instructor approval status
 }
 
 export interface PeerReview {
@@ -23,7 +27,9 @@ export interface PeerReview {
   sprint: number;
   reviewingTeamId: string;
   reviewedTeamId: string;
-  reviewLink: string;
+  reviewedTeamReportLink?: string,
+  summaryPDFLink?: string,
+  commentsPDFLink?: string,
   status: 'pending' | 'submitted' | 'graded';
   submittedAt: Date | null;
   dueDate?: Date;
@@ -43,18 +49,18 @@ export interface StudentDashboardProps {
   reviewAssignments: PeerReview[];
 }
 
-export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'ET' | 'E'
+export type AssignmentLetter = 'A' | 'R' | 'I' | 'C' | 'TE' | 'E'
 
 export type Assignments = Array<AssignmentLetter>
 
-export const assignments: Assignments = ['A', 'R', 'I', 'C', 'ET', 'E'];
+export const assignments: Assignments = ['A', 'R', 'I', 'C', 'TE', 'E'];
 
 export const assignmentNames = {
   A: 'Assignment',
   R: 'Peer review',
   I: 'Implementation',
   C: 'Communication',
-  ET: 'Team extra', // For team grades
+  TE: 'Team extra', // For team grades
   E: 'Extra',
 };
 
@@ -65,3 +71,42 @@ export interface TeamGrade {
   score: number;
   comments?: string;
 }
+
+export type UserRole = 'instructor' | 'student';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  teamId: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  maxTeams: number;
+  maxStudentsPerTeam: number;
+  teams: Team[];
+}
+
+// API Service Types
+export interface ApiPeerReview extends PeerReview {
+  reviewingTeam: Team;
+  reviewedTeam: Team;
+}
+
+export interface GradeUpdate {
+  teamId: string;
+  sprint: number;
+  assignment: AssignmentLetter;
+  score: number;
+}
+
+export interface ReportLinkUpdate {
+  reviewingTeamId: string;
+  reviewedTeamId: string;
+  sprint: number;
+  reportLink: string;
+}
+
