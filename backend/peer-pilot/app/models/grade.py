@@ -11,6 +11,8 @@ class AssignmentLetterEnum(str, enum.Enum):
     R = "R" # noqa: E741
     I = "I" # noqa: E741
     C = "C" # noqa: E741
+    TE = "TE" # noqa: E741
+    E = "E" # noqa: E741
 
 
 class Grade(Base):

@@ -1,22 +1,64 @@
-from datetime import datetime
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field
+from typing import Optional, Any
+from datetime import datetime
 
-from app.models.peer_review import ReviewStatusEnum
+from app.models.peer_review import PeerReviewStatus
+from app.schemas.team import TeamRead
 
 
 class PeerReviewBase(BaseModel):
     sprint: int
-    reviewing_team_id: int = Field(validation_alias="reviewingTeamId")
-    reviewed_team_id: int = Field(validation_alias="reviewedTeamId")
-    review_link: Optional[str] = Field(None, validation_alias="reviewLink")
-    status: ReviewStatusEnum = ReviewStatusEnum.pending
-    submitted_at: Optional[datetime] = Field(None, validation_alias="submittedAt")
-    due_date: Optional[datetime] = Field(None, validation_alias="dueDate")
 
-    class Config:
-        allow_population_by_field_name = True
+    # ВАЖНО: имена полей совпадают с ORM (snake_case),
+    # а наружу отдаём camelCase через serialization_alias
+    reviewing_team_id: int = Field(serialization_alias="reviewingTeamId")
+    reviewed_team_id: int = Field(serialization_alias="reviewedTeamId")
+
+    reviewed_team_report_link: str | None = Field(
+        default=None,
+        serialization_alias="reviewedTeamReportLink",
+    )
+    summary_pdf_link: str | None = Field(
+        default=None,
+        serialization_alias="summaryPDFLink",
+    )
+    comments_pdf_link: str | None = Field(
+        default=None,
+        serialization_alias="commentsPDFLink",
+    )
+
+    status: PeerReviewStatus
+    submitted_at: datetime | None = Field(
+        default=None,
+        serialization_alias="submittedAt",
+    )
+    due_date: datetime | None = Field(
+        default=None,
+        serialization_alias="dueDate",
+    )
+
+    assigned_work: str | None = Field(
+        default=None,
+        serialization_alias="assignedWork",
+    )
+    # тут тип подгони под фронт: dict или конкретный Typed объект
+    suggested_grades: dict | None = Field(
+        default=None,
+        serialization_alias="suggestedGrades",
+    )
+    review_grade: int | None = Field(
+        default=None,
+        serialization_alias="reviewGrade",
+    )
+
+    # связи с командами — имена как в ORM, alias как ждёт фронт
+    reviewing_team: TeamRead = Field(serialization_alias="reviewingTeam")
+    reviewed_team: TeamRead = Field(serialization_alias="reviewedTeam")
+
+    model_config = ConfigDict(
+        from_attributes=True,   # брать данные из ORM-атрибутов
+        populate_by_name=True,  # позволять использовать имена полей, а не alias
+    )
 
 
 class PeerReviewCreate(PeerReviewBase):
@@ -24,25 +66,32 @@ class PeerReviewCreate(PeerReviewBase):
 
 
 class PeerReviewUpdate(BaseModel):
-    review_link: Optional[str] = Field(None, validation_alias="reviewLink")
-    status: Optional[ReviewStatusEnum] = None
-    submitted_at: Optional[datetime] = Field(None, validation_alias="submittedAt")
-    due_date: Optional[datetime] = Field(None, validation_alias="dueDate")
+    sprint: Optional[int] = None
+    reviewingTeamId: Optional[int] = None
+    reviewedTeamId: Optional[int] = None
+    reviewedTeamReportLink: Optional[str] = None
+    summaryPDFLink: Optional[str] = None
+    commentsPDFLink: Optional[str] = None
+    status: Optional[PeerReviewStatus] = None
+    submittedAt: Optional[datetime] = None
+    dueDate: Optional[datetime] = None
+    assignedWork: Optional[str] = None
+    suggestedGrades: Optional[dict[str, Any]] = None
+    reviewGrade: Optional[int] = None
 
-    class Config:
-        allow_population_by_field_name = True
 
-
-class PeerReviewRead(BaseModel):
+class PeerReviewRead(PeerReviewBase):
     id: int
-    sprint: int
-    reviewing_team_id: int = Field(serialization_alias="reviewingTeamId")
-    reviewed_team_id: int = Field(serialization_alias="reviewedTeamId")
-    review_link: Optional[str] = Field(serialization_alias="reviewLink")
-    status: ReviewStatusEnum
-    submitted_at: Optional[datetime] = Field(serialization_alias="submittedAt")
-    due_date: Optional[datetime] = Field(serialization_alias="dueDate")
 
-    model_config = ConfigDict(
-        from_attributes=True,
-    )
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ApiPeerReviewRead(PeerReviewRead):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReportLinkUpdate(BaseModel):
+    reviewingTeamId: int
+    reviewedTeamId: int
+    sprint: int
+    reportLink: str

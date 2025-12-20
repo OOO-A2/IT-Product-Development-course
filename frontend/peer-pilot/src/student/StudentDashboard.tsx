@@ -63,21 +63,46 @@ export default function StudentDashboard({ studentId }: StudentDashboardProps) {
     fetchDashboardData();
   }, [fetchDashboardData, activeTab]);
 
-  const handleDeleteReview = async (reviewId: string) => {
-    if (!window.confirm('Are you sure you want to delete this review?')) {
+  const handleDeleteReview = async (
+    reviewId: string,
+    fileType: 'comments' | 'summary'
+  ) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete the ${fileType === 'comments' ? 'comments PDF' : 'summary PDF'}?`
+      )
+    ) {
       return;
     }
 
     try {
-      await studentApi.deletePeerReview(reviewId);
+      await studentApi.deleteReviewFile(reviewId, fileType);
 
-      // Remove from local state
-      setPeerReviews(prev => prev.filter(review => review.id !== reviewId));
+      // Обновляем только нужные поля в локальном стейте
+      setPeerReviews((prev) =>
+        prev.map((review) => {
+          if (review.id !== reviewId) return review;
 
-      console.log(`Review ${reviewId} deleted successfully`);
+          if (fileType === 'comments') {
+            return {
+              ...review,
+              commentsPDFLink: undefined,
+            };
+          }
+
+          // summary
+          return {
+            ...review,
+            summaryPDFLink: undefined,
+            suggestedGrades: undefined,
+          };
+        })
+      );
+
+      console.log(`Review file (${fileType}) for ${reviewId} deleted successfully`);
     } catch (err) {
-      alert('Failed to delete review. Please try again.');
-      console.error('Error deleting review:', err);
+      alert('Failed to delete review file. Please try again.');
+      console.error('Error deleting review file:', err);
     }
   };
 

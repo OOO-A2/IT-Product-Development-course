@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import type { User } from '../types/types';
-import { mockUsers } from '../data/mock';
+import { API_BASE_URL } from '../api/studentApi';
 
 interface LoginProps {
   onLogin: (user: User) => void;
+}
+
+interface LoginResponse {
+  access_token: string;
+  token_type: string;
+}
+
+interface MeResponse {
+  id: number;
+  name: string;
+  email: string;
+  role: 'instructor' | 'student';
+  studentId: number;
+  teamId?: number | null;
 }
 
 export default function LoginPage({ onLogin }: LoginProps) {
@@ -15,26 +29,60 @@ export default function LoginPage({ onLogin }: LoginProps) {
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    if (!email || !password) return;
     e.preventDefault();
+    if (!email || !password) return;
+
     setIsLoading(true);
     setError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock authentication - replace with real auth
-      const user = mockUsers.find(u => u.email === email && u.email.split('@')[0] === password);
-      
-      if (user) {
-        onLogin(user);
-      } else {
-        setError('Invalid credentials. Use "instructor" or "student" as password for demo.');
+      // 1) Логинимся на бек
+      const loginResp = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!loginResp.ok) {
+        const errText = await loginResp.text();
+        throw new Error(`Auth error: ${loginResp.status} ${errText}`);
       }
-    } catch (err) {
-      setError('Login failed. Please try again.');
-      console.log(`Error: ${err}`)
+
+      const loginData: LoginResponse = await loginResp.json();
+      const token = loginData.access_token;
+
+      // 2) Сохраняем токен (если нужно — потом вытащишь из localStorage)
+      localStorage.setItem('access_token', token);
+
+      // 3) Тянем профиль текущего пользователя
+      const meResp = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!meResp.ok) {
+        const errText = await meResp.text();
+        throw new Error(`Failed to load profile: ${meResp.status} ${errText}`);
+      }
+
+      const me: MeResponse = await meResp.json();
+
+      const user: User = {
+        id: String(me.id),
+        name: me.name,
+        email: me.email,
+        role: me.role,
+        studentId: String(me.studentId),
+        teamId: me.teamId ? String(me.teamId) : '',
+      };
+
+      onLogin(user);
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.message || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +90,7 @@ export default function LoginPage({ onLogin }: LoginProps) {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSubmit(e);
+      handleSubmit(e as unknown as React.FormEvent);
     }
   };
 
@@ -68,7 +116,7 @@ export default function LoginPage({ onLogin }: LoginProps) {
               </div>
             )}
 
-            {/* Demo Credentials */}
+            {/* Demo Credentials (можно оставить как подсказку, если такие пользователи есть в БД) */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h3 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials:</h3>
               <div className="text-xs text-blue-700 space-y-1">
@@ -76,7 +124,6 @@ export default function LoginPage({ onLogin }: LoginProps) {
                 <p><strong>Student:</strong> arsen@innopolis.university / arsen</p>
               </div>
             </div>
-
 
             {/* Email Input */}
             <div className="space-y-2">
@@ -113,7 +160,9 @@ export default function LoginPage({ onLogin }: LoginProps) {
                   placeholder="Enter your password"
                   className="w-full pl-11 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:ring-4 focus:ring-purple-100 outline-none transition-all duration-200"
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -130,8 +179,18 @@ export default function LoginPage({ onLogin }: LoginProps) {
               {isLoading ? (
                 <span className="flex items-center justify-center space-x-2">
                   <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor"
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>

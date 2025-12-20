@@ -1,5 +1,36 @@
 import type { Grade, Student, Team } from "../types/types";
 
+
+function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = localStorage.getItem("access_token");
+
+  // Normalize HeadersInit into a plain object
+  const baseHeaders: Record<string, string> = {};
+
+  if (options.headers) {
+    if (options.headers instanceof Headers) {
+      options.headers.forEach((value, key) => {
+        baseHeaders[key] = value;
+      });
+    } else if (Array.isArray(options.headers)) {
+      for (const [key, value] of options.headers) {
+        baseHeaders[key] = value;
+      }
+    } else {
+      Object.assign(baseHeaders, options.headers);
+    }
+  }
+
+  if (token) {
+    baseHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers: baseHeaders,
+  });
+}
+
 // api/studentApi.ts
 export const API_BASE_URL = 'http://localhost:8000';
 
@@ -12,21 +43,21 @@ export const studentApi = {
     grades: Grade[];
     reviewAssignments: any[];
   }> {
-    const response = await fetch(`${API_BASE_URL}/dashboard/students/${studentId}`);
+    const response = await authFetch(`${API_BASE_URL}/dashboard/students/${studentId}`);
     if (!response.ok) throw new Error('Failed to fetch student dashboard');
     return response.json();
   },
 
   // Fetch grades for a student
   async fetchStudentGrades(studentId: string): Promise<any[]> {
-    const response = await fetch(`${API_BASE_URL}/grades?student_id=${studentId}`);
+    const response = await authFetch(`${API_BASE_URL}/grades?student_id=${studentId}`);
     if (!response.ok) throw new Error('Failed to fetch grades');
     return response.json();
   },
 
   // Fetch peer reviews for a team
   async fetchPeerReviews(teamId: string): Promise<any[]> {
-    const response = await fetch(`${API_BASE_URL}/peer-reviews?reviewing_team_id=${teamId}`);
+    const response = await authFetch(`${API_BASE_URL}/peer-reviews?reviewing_team_id=${teamId}`);
     if (!response.ok) throw new Error('Failed to fetch peer reviews');
     return response.json();
   },
@@ -43,7 +74,7 @@ export const studentApi = {
     }
 
     // Send the file to backend API
-    const response = await fetch(API_BASE_URL + '/reviews/upload', {
+    const response = await authFetch(API_BASE_URL + '/peer-reviews/upload', {
       method: 'POST',
       body: formData,
     });
@@ -65,7 +96,7 @@ export const studentApi = {
       ? `${API_BASE_URL}/peer-reviews/${reviewData.id}`
       : `${API_BASE_URL}/peer-reviews/`;
 
-    const response = await fetch(url, {
+    const response = await authFetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -82,26 +113,35 @@ export const studentApi = {
   },
 
   // Delete a peer review
-  async deletePeerReview(reviewId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/peer-reviews/${reviewId}`, {
-      method: 'DELETE',
-    });
+  async deleteReviewFile(
+    reviewId: string,
+    fileType: 'comments' | 'summary',
+  ): Promise<void> {
+    const response = await authFetch(
+      `${API_BASE_URL}/peer-reviews/${reviewId}/file/${fileType}`,
+      { method: 'DELETE' },
+    );
 
     if (!response.ok) {
-      throw new Error('Failed to delete peer review');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.detail ||
+        errorData.message ||
+        `Delete failed with status ${response.status}`,
+      );
     }
   },
 
   // Fetch team members
   async fetchTeamMembers(teamId: string): Promise<any[]> {
-    const response = await fetch(`${API_BASE_URL}/students?team_id=${teamId}`);
+    const response = await authFetch(`${API_BASE_URL}/students?team_id=${teamId}`);
     if (!response.ok) throw new Error('Failed to fetch team members');
     return response.json();
   },
 
   // Fetch team details
   async fetchTeam(teamId: string): Promise<any> {
-    const response = await fetch(`${API_BASE_URL}/teams/${teamId}`);
+    const response = await authFetch(`${API_BASE_URL}/teams/${teamId}`);
     if (!response.ok) throw new Error('Failed to fetch team');
     return response.json();
   },

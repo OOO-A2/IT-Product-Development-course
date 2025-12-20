@@ -2,16 +2,13 @@ import { useState, useEffect } from 'react';
 import { Users, Mail, Calendar, TrendingUp, Save, Loader } from 'lucide-react';
 import { assignments, type AssignmentLetter, type Grade, type Student, type Team } from '../../types/types';
 import { getGradeColor100, getGradeColor500 } from '../../utils/utils';
+import { apiService } from '../../api/instructorApi';
 
-const API_BASE_URL = 'http://localhost:8000';
-const STUDENTS_ENDPOINT = `${API_BASE_URL}/students`;
-const TEAMS_ENDPOINT = `${API_BASE_URL}/teams`;
-const GRADES_ENDPOINT = `${API_BASE_URL}/grades`;
 
 export default function AllStudentsDashboard() {
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [editingCell, setEditingCell] = useState<string | null>(null);
-  const sprints = [1, 2, 3, 4];
+  const sprints = [1, 2, 3, 4, 5, 6, 7, 8];
 
   const [students, setStudents] = useState<Student[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -33,23 +30,15 @@ export default function AllStudentsDashboard() {
     
     try {
       // Fetch all data in parallel
-      const [studentsRes, teamsRes, gradesRes] = await Promise.all([
-        fetch(STUDENTS_ENDPOINT),
-        fetch(TEAMS_ENDPOINT),
-        fetch(GRADES_ENDPOINT)
+      const [studentsData, teamsData, gradesData] = await Promise.all([
+        apiService.fetchStudents(),
+        apiService.fetchTeams(),
+        apiService.fetchGrades()
       ]);
 
-      if (!studentsRes.ok || !teamsRes.ok || !gradesRes.ok) {
-        throw new Error('Failed to fetch data from server');
-      }
-
-      const studentsData: Student[] = await studentsRes.json();
-      const teamsData: Team[] = await teamsRes.json();
-      const gradesData: Grade[] = await gradesRes.json();
-
-      setStudents(studentsData);
-      setTeams(teamsData);
-      setGrades(gradesData);
+      setStudents(studentsData || []);
+      setTeams(teamsData || []);
+      setGrades(gradesData || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
       console.error('Error fetching data:', err);
@@ -134,17 +123,9 @@ export default function AllStudentsDashboard() {
 
     try {
       // Send updated grades to backend
-      const response = await fetch(GRADES_ENDPOINT, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ grades }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save grades');
-      }
+      await apiService.saveGrades(grades);
+      setUnsavedChanges(false);
+      await fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save grades');
       console.error('Error saving grades:', err);

@@ -51,7 +51,7 @@ export default function InstructorPeerReview() {
     setSearchParams(newParams, { replace: true });
   }, [selectedSprint, setSearchParams, searchParams]);
 
-  const sprints = [1, 2, 3, 4, 5];
+  const sprints = [1, 2, 3, 4, 5, 6, 7, 8];
 
   // Fetch all data
   const fetchData = useCallback(async () => {
@@ -81,15 +81,20 @@ export default function InstructorPeerReview() {
       // Initialize report links from existing data
       const initialReportLinks: { [key: string]: string } = {};
       reviewsData.forEach((review: ApiPeerReview) => {
-        if (review.assignedWork) {
-          // Extract link from assigned work description
+        const key = `${review.reviewedTeamId}-${selectedSprint}`;
+
+        if (review.reviewedTeamReportLink) {
+          // нормальный путь — берём из отдельного поля
+          initialReportLinks[key] = review.reviewedTeamReportLink;
+        } else if (review.assignedWork) {
+          // fallback на старое поведение, если где-то остались старые данные
           const match = review.assignedWork.match(/https?:\/\/[^\s]+/);
           if (match) {
-            const key = `${review.reviewedTeamId}-${selectedSprint}`;
             initialReportLinks[key] = match[0];
           }
         }
       });
+
       setReportLinks(initialReportLinks);
 
       // Reset pending changes

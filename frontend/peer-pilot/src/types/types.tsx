@@ -80,6 +80,7 @@ export interface User {
   email: string;
   role: UserRole;
   teamId: string;
+  studentId: string;
 }
 
 export interface Project {
