@@ -145,7 +145,17 @@ export default function InstructorGrading() {
     });
 
     // Track pending updates
-    setPendingGradeUpdates(prev => [...prev, ...updatedGrades]);
+    setPendingGradeUpdates(prev => {
+      const filtered = prev.filter(
+        g => !updatedGrades.some(
+          u =>
+            u.studentId === g.studentId &&
+            u.sprint === g.sprint &&
+            u.assignment === g.assignment
+        )
+      );
+      return [...filtered, ...updatedGrades];
+    });
     setUnsavedChanges(true);
   };
 
@@ -185,7 +195,17 @@ export default function InstructorGrading() {
     });
 
     // Track pending updates
-    setPendingGradeUpdates(prev => [...prev, updatedGrade]);
+    setPendingGradeUpdates(prev => {
+      const filtered = prev.filter(
+        g =>
+          !(
+            g.studentId === updatedGrade.studentId &&
+            g.sprint === updatedGrade.sprint &&
+            g.assignment === updatedGrade.assignment
+          )
+      );
+      return [...filtered, updatedGrade];
+    });
     setUnsavedChanges(true);
   };
 

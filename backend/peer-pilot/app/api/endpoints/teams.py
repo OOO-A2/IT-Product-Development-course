@@ -59,7 +59,6 @@ TOTAL_SPRINTS = 8
 def maybe_generate_peer_reviews_for_project(db: Session, project_id: int) -> None:
     teams: List[Team] = (
         db.query(Team)
-        .filter(Team.project_id == project_id)
         .order_by(Team.id)
         .all()
     )
