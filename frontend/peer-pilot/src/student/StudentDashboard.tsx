@@ -44,9 +44,13 @@ export default function StudentDashboard({ studentId }: StudentDashboardProps) {
       const team = dashboardData.teams.filter(t => t.id === dashboardData.student.teamId)[0];
       const [peerReviewsData] = await Promise.all([team ? studentApi.fetchPeerReviews(team.id) : Promise.resolve([])]);
 
+      const teamMembers = dashboardData.students.filter(
+        s => String(s.teamId) === String(dashboardData.student.teamId),
+      );
+
       setStudent(dashboardData.student);
       setTeam(team);
-      setTeamStudents(dashboardData.students);
+      setTeamStudents(teamMembers);
       setGrades(studentGrades);
       setPeerReviews(peerReviewsData);
 
