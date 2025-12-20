@@ -70,11 +70,11 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
       const data = await studentApi.uploadFile(reviewId, fileType, file, suggestedGrades)
 
       const updates: Partial<PeerReview> = {
-        status: 'submitted',
         submittedAt: new Date(),
       };
 
       if (fileType === 'summary') {
+        updates.status = 'submitted';
         updates.summaryPDFLink = data.fileUrl; // URL from backend
         updates.suggestedGrades = suggestedGrades[reviewId];
       } else {
