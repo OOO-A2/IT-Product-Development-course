@@ -91,6 +91,21 @@ def list_peer_reviews(
             query = query.filter(PeerReview.reviewing_team_id == reviewing_team_id)
 
     reviews = query.all()
+
+    if current_user.role == UserRole.STUDENT:
+        for pr in reviews:
+            mirror = (
+                db.query(PeerReview)
+                .filter(
+                    PeerReview.sprint == pr.sprint,
+                    PeerReview.reviewing_team_id == pr.reviewed_team_id,  # команда напротив — reviewer
+                )
+                .first()
+            )
+
+            if mirror and mirror.reviewed_team_report_link:
+                # подменяем ТОЛЬКО в ответе (commit не делаем)
+                pr.reviewed_team_report_link = mirror.reviewed_team_report_link
     return reviews
 
 
@@ -136,12 +151,12 @@ def update_peer_review(
         raise HTTPException(404, "Peer review not found")
 
     for field, value in data.model_dump(exclude_unset=True).items():
+        if field == "status":
+            continue
         attr = {
             "reviewingTeamId": "reviewing_team_id",
             "reviewedTeamId": "reviewed_team_id",
             "reviewedTeamReportLink": "reviewed_team_report_link",
-            "summaryPDFLink": "summary_pdf_link",
-            "commentsPDFLink": "comments_pdf_link",
             "submittedAt": "submitted_at",
             "dueDate": "due_date",
             "assignedWork": "assigned_work",
@@ -176,7 +191,7 @@ def delete_review_file(
         path_str = pr.summary_pdf_link
         pr.summary_pdf_link = None
         pr.suggested_grades = None
-        pr.status = PeerReviewStatus.PENDING
+    pr.status = PeerReviewStatus.PENDING
 
     # если ссылку вообще не хранили — просто 204
     if path_str:
@@ -197,6 +212,17 @@ def delete_review_file(
     return
 
 
+def _recompute_status(pr: PeerReview):
+    has_summary = bool(pr.summary_pdf_link)
+    has_comments = bool(pr.comments_pdf_link)
+
+    if has_summary and has_comments:
+        pr.status = PeerReviewStatus.SUBMITTED
+        if not pr.submitted_at:
+            pr.submitted_at = datetime.utcnow()
+    else:
+        pr.status = PeerReviewStatus.PENDING
+        pr.submitted_at = None
 
 # ---------- FILE UPLOAD ----------
 
@@ -237,7 +263,8 @@ async def upload_review_file(
                 pr.suggested_grades = json.loads(suggestedGrades)
             except json.JSONDecodeError:
                 pass
-
+    
+    _recompute_status(pr)
     db.commit()
     db.refresh(pr)
 

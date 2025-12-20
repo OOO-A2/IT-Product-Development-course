@@ -74,7 +74,6 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
       };
 
       if (fileType === 'summary') {
-        updates.status = 'submitted';
         updates.summaryPDFLink = data.fileUrl; // URL from backend
         updates.suggestedGrades = suggestedGrades[reviewId];
       } else {
