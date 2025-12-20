@@ -70,8 +70,22 @@ def maybe_generate_peer_reviews_for_project(db: Session, project_id: int) -> Non
     # Если есть хотя бы одна незалоченная команда — ещё рано
     if any(not t.is_locked for t in teams):
         return
+    
+    non_empty_teams: List[Team] = []
+    for t in teams:
+        # считаем, что есть relationship Team.students
+        if t.is_locked and (not t.students or len(t.students) == 0):
+            db.delete(t)
+        else:
+            non_empty_teams.append(t)
 
-    team_ids = [t.id for t in teams]
+    db.flush()
+
+    if len(non_empty_teams) < 2:
+        db.commit()
+        return
+
+    team_ids = [t.id for t in non_empty_teams]
 
     # 1. Сносим все старые ревью по этому проекту
     db.query(PeerReview).filter(
@@ -82,15 +96,15 @@ def maybe_generate_peer_reviews_for_project(db: Session, project_id: int) -> Non
     ).delete(synchronize_session=False)
 
     # 2. Генерируем новые ревью на все спринты
-    n = len(teams)
+    n = len(non_empty_teams)
     sprints = list(range(1, TOTAL_SPRINTS + 1))
 
     for sprint in sprints:
         # shift от 1 до n-1, чтобы не было self-review
         shift = (sprint % (n - 1)) + 1 if n > 1 else 0
 
-        for idx, reviewing_team in enumerate(teams):
-            reviewed_team = teams[(idx + shift) % n]
+        for idx, reviewing_team in enumerate(non_empty_teams):
+            reviewed_team = non_empty_teams[(idx + shift) % n]
 
             review = PeerReview(
                 sprint=sprint,
@@ -107,6 +121,8 @@ def maybe_generate_peer_reviews_for_project(db: Session, project_id: int) -> Non
                 review_grade=None,
             )
             db.add(review)
+
+    db.commit()
 
 
 @router.patch("/{team_id}", response_model=TeamRead)
