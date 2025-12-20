@@ -6,35 +6,21 @@ from app.models.grade import AssignmentLetterEnum
 
 
 class GradeBase(BaseModel):
-    student_id: int = Field(validation_alias="studentId")
+    studentId: int
     sprint: int
     assignment: AssignmentLetterEnum
     score: int
-
-    class Config:
-        allow_population_by_field_name = True
 
 
 class GradeCreate(GradeBase):
     pass
 
 
-class GradeUpdate(BaseModel):
-    sprint: Optional[int] = None
-    assignment: Optional[AssignmentLetterEnum] = None
-    score: Optional[int] = None
-
-    class Config:
-        allow_population_by_field_name = True
+class GradeUpsert(GradeBase):
+    id: Optional[int] = None
 
 
-class GradeRead(BaseModel):
+class GradeRead(GradeBase):
     id: int
-    student_id: int = Field(serialization_alias="studentId")
-    sprint: int
-    assignment: AssignmentLetterEnum
-    score: int
 
-    model_config = ConfigDict(
-        from_attributes=True,
-    )
+    model_config = ConfigDict(from_attributes=True)

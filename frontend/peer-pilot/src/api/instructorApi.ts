@@ -1,10 +1,41 @@
 import type { ApiPeerReview, Grade, ReportLinkUpdate, Student, Team } from "../types/types";
 import { API_BASE_URL } from "./studentApi";
 
+function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = localStorage.getItem("access_token");
+
+  // Normalize HeadersInit into a plain object
+  const baseHeaders: Record<string, string> = {};
+
+  if (options.headers) {
+    if (options.headers instanceof Headers) {
+      options.headers.forEach((value, key) => {
+        baseHeaders[key] = value;
+      });
+    } else if (Array.isArray(options.headers)) {
+      for (const [key, value] of options.headers) {
+        baseHeaders[key] = value;
+      }
+    } else {
+      Object.assign(baseHeaders, options.headers);
+    }
+  }
+
+  if (token) {
+    baseHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers: baseHeaders,
+  });
+}
+
+
 export const apiService = {
     // Fetch all teams
     async fetchTeams(): Promise<Team[]> {
-        const response = await fetch(`${API_BASE_URL}/teams`);
+        const response = await authFetch(`${API_BASE_URL}/teams`);
         if (!response.ok) throw new Error('Failed to fetch teams');
         const result: Team[] = await response.json();
         return result;
@@ -12,7 +43,7 @@ export const apiService = {
 
     // Fetch all students
     async fetchStudents(): Promise<Student[]> {
-        const response = await fetch(`${API_BASE_URL}/students`);
+        const response = await authFetch(`${API_BASE_URL}/students`);
         if (!response.ok) throw new Error('Failed to fetch students');
         const result: Student[] = await response.json();
         return result;
@@ -20,7 +51,7 @@ export const apiService = {
 
     // Fetch grades
     async fetchGrades(): Promise<Grade[]> {
-        const response = await fetch(`${API_BASE_URL}/grades`);
+        const response = await authFetch(`${API_BASE_URL}/grades`);
         if (!response.ok) throw new Error('Failed to fetch grades');
         const result: Grade[] = await response.json();
         return result;
@@ -28,7 +59,7 @@ export const apiService = {
 
     // Save grades (batch update)
     async saveGrades(grades: Grade[]): Promise<void> {
-        const response = await fetch(`${API_BASE_URL}/grades`, {
+        const response = await authFetch(`${API_BASE_URL}/grades`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -44,7 +75,7 @@ export const apiService = {
 
     // Get all peer reviews for a sprint
     async getPeerReviews(sprint: number): Promise<ApiPeerReview[]> {
-        const response = await fetch(`${API_BASE_URL}/peer-reviews?sprint=${sprint}`);
+        const response = await authFetch(`${API_BASE_URL}/peer-reviews?sprint=${sprint}`);
         if (!response.ok) throw new Error('Failed to fetch peer reviews');
         return response.json();
     },
@@ -52,7 +83,7 @@ export const apiService = {
 
     // Update report link
     async updateReportLink(update: ReportLinkUpdate): Promise<void> {
-        const response = await fetch(`${API_BASE_URL}/api/peer-reviews/report-link`, {
+        const response = await authFetch(`${API_BASE_URL}/peer-reviews/report-link`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(update),
@@ -62,7 +93,7 @@ export const apiService = {
 
     // Download review PDF
     async downloadReviewPdf(reviewId: string, type: 'summary' | 'detailed'): Promise<void> {
-        const response = await fetch(`${API_BASE_URL}/peer-reviews/${reviewId}/download/${type}`, {
+        const response = await authFetch(`${API_BASE_URL}/peer-reviews/${reviewId}/download/${type}`, {
             headers: { 'Accept': 'application/pdf' },
         });
 
@@ -81,7 +112,7 @@ export const apiService = {
 
     // Download all files for sprint
     async downloadAllFiles(sprint: number): Promise<void> {
-        const response = await fetch(`${API_BASE_URL}/sprints/${sprint}/download-all`, {
+        const response = await authFetch(`${API_BASE_URL}/sprints/${sprint}/download-all`, {
             headers: { 'Accept': 'application/zip' },
         });
 

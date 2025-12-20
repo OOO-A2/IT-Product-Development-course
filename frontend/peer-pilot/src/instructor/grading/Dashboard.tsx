@@ -77,7 +77,7 @@ export default function InstructorGrading() {
     fetchData();
   }, []);
 
-  const sprints = [1, 2, 3, 4];
+  const sprints = [1, 2, 3, 4, 5, 6, 7, 8];
 
   // Calculate team averages for assignments
   const getTeamAssignmentGrade = (teamId: string, sprint: number, assignment: AssignmentLetter): number => {

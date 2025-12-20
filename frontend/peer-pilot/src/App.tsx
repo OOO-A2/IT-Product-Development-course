@@ -80,7 +80,7 @@ function App() {
                 <Routes>
                   <Route index element={
                     <StudentDashboard
-                      studentId={'1'}/>} />
+                      studentId={user.studentId}/>} />
                   <Route path="teams" element={<TeamManagement role="student" />} />
                   <Route path="*" element={<Navigate to="/student" replace />} />
                 </Routes>

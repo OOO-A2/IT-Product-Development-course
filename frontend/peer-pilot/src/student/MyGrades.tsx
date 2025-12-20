@@ -8,7 +8,7 @@ interface MyGradesProps {
 }
 
 export default function MyGrades({ student, grades }: MyGradesProps) {
-  const sprints = [1, 2, 3, 4, 5];
+  const sprints = [1, 2, 3, 4, 5, 6, 7, 8];
 
   const getGrade = (sprint: number, assignment: AssignmentLetter): number => {
     const grade = grades.find(

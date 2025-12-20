@@ -6,6 +6,7 @@ export const mockUsers: User[] = [
         name: 'Professor Denis',
         email: 'denis@innopolis.ru',
         role: 'instructor' as UserRole,
+        studentId: '1',
         teamId: ''
     },
     {
@@ -13,6 +14,7 @@ export const mockUsers: User[] = [
         name: 'Arsen',
         email: 'arsen@innopolis.university',
         role: 'student' as UserRole,
+        studentId: '1',
         teamId: 't1'
     }
 ];

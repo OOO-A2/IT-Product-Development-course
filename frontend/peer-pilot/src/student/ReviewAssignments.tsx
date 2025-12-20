@@ -9,7 +9,7 @@ interface ReviewAssignmentsProps {
   team: Team;
   reviews: PeerReview[];
   onUpdateReview: (reviewId: string, updates: Partial<PeerReview>) => Promise<any>;
-  onDeleteReview: (reviewId: string) => Promise<void>;
+  onDeleteReview: (reviewId: string, fileType: 'comments' | 'summary') => Promise<void>;
 }
 
 export default function ReviewAssignments({ team, reviews: reviews, onUpdateReview, onDeleteReview }: ReviewAssignmentsProps) {
@@ -101,24 +101,33 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
     }
   };
 
-  const handleDeleteReview = async (reviewId: string) => {
-    if (!window.confirm('Are you sure you want to delete this review? You will need to resubmit it.')) {
+  const handleDeleteReviewFile = async (
+    reviewId: string,
+    fileType: 'comments' | 'summary',
+  ) => {
+    if (
+      !window.confirm(
+        'Are you sure you want to delete this file? You will need to re-upload it.',
+      )
+    ) {
       return;
     }
 
     setIsDeleting(reviewId);
     try {
-      await onDeleteReview(reviewId);
+      await onDeleteReview(reviewId, fileType);
 
-      // Clear suggested grades for this review
-      setSuggestedGrades(prev => {
-        const newGrades = { ...prev };
-        delete newGrades[reviewId];
-        return newGrades;
-      });
+      // локально чистим suggestedGrades, если это summary
+      if (fileType === 'summary') {
+        setSuggestedGrades(prev => {
+          const newGrades = { ...prev };
+          delete newGrades[reviewId];
+          return newGrades;
+        });
+      }
     } catch (error) {
-      alert('Failed to delete review. Please try again.');
-      console.error('Error deleting review:', error);
+      alert('Failed to delete review file. Please try again.');
+      console.error('Error deleting review file:', error);
     } finally {
       setIsDeleting(null);
     }
@@ -268,7 +277,7 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
                             <span className="text-sm font-medium text-green-800">Comments submitted</span>
                           </div>
                           <button
-                            onClick={() => handleDeleteReview(review.id)}
+                            onClick={() => handleDeleteReviewFile(review.id, 'comments')}
                             disabled={isDeleting === review.id}
                             className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors disabled:opacity-50"
                             title="Delete review"
@@ -352,7 +361,7 @@ export default function ReviewAssignments({ team, reviews: reviews, onUpdateRevi
                             <span className="text-sm font-medium text-green-800">Summary submitted</span>
                           </div>
                           <button
-                            onClick={() => handleDeleteReview(review.id)}
+                            onClick={() => handleDeleteReviewFile(review.id, 'summary')}
                             disabled={isDeleting === review.id}
                             className="p-1 text-red-600 hover:bg-red-100 rounded transition-colors disabled:opacity-50"
                             title="Delete review"
